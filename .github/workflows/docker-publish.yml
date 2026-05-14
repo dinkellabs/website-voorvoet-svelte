@@ -13,6 +13,22 @@ on:
   push:
     branches:
       - main
+    # Only fire on changes that affect what ships in the image. Docs,
+    # README, .vscode, etc. don't trigger publish.
+    paths:
+      - 'src/**'
+      - 'static/**'
+      - 'messages/**'
+      - 'project.inlang/**'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'VERSION'
+      - 'svelte.config.js'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - '.github/workflows/docker-publish.yml'
   workflow_dispatch:
 
 permissions:

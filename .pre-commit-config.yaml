@@ -52,3 +52,17 @@ repos:
         pass_filenames: false
         types_or: [file]
         files: \.(ts|js|svelte)$
+
+      - id: env-private-check
+        name: No $env/*/private outside server context
+        language: system
+        entry: bash scripts/check-env-private.sh
+        pass_filenames: false
+        files: \.(ts|svelte)$
+
+      - id: version-check
+        name: VERSION ↔ package.json consistency
+        language: system
+        entry: pnpm version:check
+        pass_filenames: false
+        files: ^(VERSION|package\.json)$
