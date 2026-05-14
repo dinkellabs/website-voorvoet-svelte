@@ -16,22 +16,27 @@ on:
     branches:
       - main
       - dev
-    # Only fire on changes that affect what ships in the image. Docs,
-    # README, .vscode, etc. don't trigger publish.
-    paths:
-      - 'src/**'
-      - 'static/**'
-      - 'messages/**'
-      - 'project.inlang/**'
-      - 'Dockerfile'
-      - '.dockerignore'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'VERSION'
-      - 'svelte.config.js'
-      - 'vite.config.ts'
-      - 'tsconfig.json'
-      - '.github/workflows/docker-publish.yml'
+    # Skip pushes that only touch files irrelevant to the image. Using
+    # `paths-ignore` (exclusion) rather than `paths` (inclusion) means a
+    # zero-diff push — e.g. creating `dev` from the current `main` HEAD —
+    # still triggers, since nothing matches the ignore list.
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE'
+      - 'NOTICE'
+      - 'docs/**'
+      - 'e2e/**'
+      - 'lighthouse/**'
+      - 'scripts/**'
+      - '.vscode/**'
+      - '.editorconfig'
+      - '.prettier*'
+      - '.pre-commit-config.yaml'
+      - 'eslint.config.js'
+      - 'playwright.config.ts'
+      - 'playwright-isolate.config.ts'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/docker.yml'
   workflow_dispatch:
 
 permissions:
