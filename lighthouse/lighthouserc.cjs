@@ -2,6 +2,12 @@
 module.exports = {
   ci: {
     collect: {
+      // lhci spawns `vite preview` and waits for it before hitting the URLs
+      // below. Without this, Chrome lands on the "site can't be reached"
+      // interstitial and lhci reports "Chrome prevented page load".
+      startServerCommand: 'pnpm preview',
+      startServerReadyPattern: 'Local:',
+      startServerReadyTimeout: 30000,
       url: [
         // NL
         'http://localhost:4173/nl',
