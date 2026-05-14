@@ -70,8 +70,8 @@
   "packageManager": "pnpm@10.33.2",
   "pnpm": {
     "overrides": {
-      "//": "kysely override clears a CVE in @inlang/sdk's transitive kysely<0.28.17 (sqlite-wasm-kysely peer). Verify with `pnpm why kysely` before deleting.",
       "kysely": ">=0.28.17"
-    }
+    },
+    "//": "The kysely override clears a CVE in @inlang/sdk's transitive kysely<0.28.17 (sqlite-wasm-kysely peer). Verify with `pnpm why kysely` before deleting."
   }
 }
