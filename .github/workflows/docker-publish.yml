@@ -1,18 +1,21 @@
 name: Publish Docker image to GHCR
 
-# Builds the production image (SvelteKit app) and pushes it to GitHub
-# Container Registry. TLS termination and request routing happen at the
-# host's reverse proxy — this image is the app only.
+# Builds the SvelteKit app image and pushes it to GitHub Container Registry.
+# TLS termination and request routing happen at the host's reverse proxy —
+# this image is the app only.
 #
-# Pullable as `ghcr.io/${{ github.repository_owner }}/website-voorvoet-svelte:<VERSION>`
-# after a successful run. The image is tagged with both the contents of the
-# repo-root `VERSION` file and `latest`. The build fails if the version tag
-# already exists in the registry — every release requires a VERSION bump.
+# Tagging by branch:
+#   main → ghcr.io/<owner>/website-voorvoet-svelte:<VERSION>
+#         ghcr.io/<owner>/website-voorvoet-svelte:latest
+#         (build fails if <VERSION> already exists — bump VERSION per release)
+#   dev  → ghcr.io/<owner>/website-voorvoet-svelte:dev          (rolling)
+#         ghcr.io/<owner>/website-voorvoet-svelte:dev-<sha7>   (immutable)
 
 on:
   push:
     branches:
       - main
+      - dev
     # Only fire on changes that affect what ships in the image. Docs,
     # README, .vscode, etc. don't trigger publish.
     paths:
@@ -36,8 +39,11 @@ permissions:
   packages: write
 
 concurrency:
+  # Per-ref grouping so main and dev publish independently. `cancel-in-progress:
+  # true` on dev only — main builds always run to completion since a successful
+  # main publish requires a VERSION bump anyway.
   group: docker-publish-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.ref == 'refs/heads/dev' }}
 
 env:
   REGISTRY: ghcr.io
@@ -65,7 +71,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Fail if version tag already exists in GHCR
+      - name: Fail if VERSION tag already exists in GHCR (main only)
+        if: github.ref == 'refs/heads/main'
         run: |
           IMAGE="${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:${{ steps.version.outputs.value }}"
           if docker manifest inspect "$IMAGE" > /dev/null 2>&1; then
@@ -82,9 +89,13 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}
+          # Branch-conditional tags. `enable=` gates each tag so main pushes
+          # only get VERSION+latest and dev pushes only get dev+dev-<sha>.
           tags: |
-            type=raw,value=${{ steps.version.outputs.value }}
-            type=raw,value=latest
+            type=raw,value=${{ steps.version.outputs.value }},enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=dev,enable=${{ github.ref == 'refs/heads/dev' }}
+            type=sha,prefix=dev-,format=short,enable=${{ github.ref == 'refs/heads/dev' }}
           labels: |
             org.opencontainers.image.title=VoorVoet Website
             org.opencontainers.image.description=Multilingual podiatry practice website (SvelteKit)
