@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
-import { dev } from '$app/environment';
+import { building, dev } from '$app/environment';
 import { withRequestId } from '$lib/server/logger.js';
 
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
@@ -8,7 +8,9 @@ const VERIFY_TIMEOUT_MS = 5000;
 
 const DUMMY_ALWAYS_PASS_SITE_KEY = '1x00000000000000000000AA';
 
-const isProduction = !dev;
+// `building` is true during `vite build`'s analyse pass; env vars aren't
+// loaded then. Skip the production guard so the build doesn't trip.
+const isProduction = !dev && !building;
 const turnstileEnabled = (env.TURNSTILE_ENABLED ?? 'false').toLowerCase() === 'true';
 const usingDummySiteKey = pubEnv.PUBLIC_TURNSTILE_SITE_KEY === DUMMY_ALWAYS_PASS_SITE_KEY;
 

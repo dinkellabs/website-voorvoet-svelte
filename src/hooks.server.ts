@@ -1,6 +1,6 @@
 import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 import { randomUUID } from 'crypto';
-import { dev } from '$app/environment';
+import { building, dev } from '$app/environment';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
 import logger, { withRequestId } from '$lib/server/logger.js';
@@ -22,7 +22,7 @@ const SKIP_TRACKING_PREFIXES = ['/health', '/sitemap.xml', '/robots.txt', '/csp-
 
 // ─── Boot-time guards ────────────────────────────────────────────────────────
 
-if (!dev) {
+if (!dev && !building) {
   const turnstileEnabled = (env.TURNSTILE_ENABLED ?? 'false').toLowerCase() === 'true';
   if (!turnstileEnabled) {
     logger.warn(

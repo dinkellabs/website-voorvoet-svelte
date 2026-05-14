@@ -45,11 +45,13 @@ jobs:
       - name: Security lint — no $env/static/private or $env/dynamic/private outside server modules
         run: |
           # Fail if any non-server file imports from $env/*/private.
-          # Allowed paths: src/lib/server/**, src/**/*.server.ts, src/hooks.server.ts, src/**/__tests__/**
+          # Allowed paths: src/lib/server/**, src/**/*.server.ts, src/**/+server.ts,
+          # src/hooks.server.ts, src/**/__tests__/**
           bad=$(grep -rn --include="*.ts" --include="*.svelte" \
             'env/dynamic/private\|env/static/private' src/ \
             | grep -v '/server/' \
             | grep -v '\.server\.ts' \
+            | grep -v '+server\.ts' \
             | grep -v 'hooks\.server\.ts' \
             | grep -v '/__tests__/' \
             || true)
