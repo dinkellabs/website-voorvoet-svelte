@@ -1,0 +1,54 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.md$
+      - id: end-of-file-fixer
+        exclude: \.svelte$
+      - id: check-yaml
+      - id: check-json
+        exclude: ^(tsconfig\.json|\.vscode/.*|messages/.*)$
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  - repo: local
+    hooks:
+      - id: eslint
+        name: ESLint
+        language: node
+        entry: pnpm exec eslint --max-warnings 0
+        types_or: [javascript, ts, file]
+        files: \.(js|ts|svelte)$
+        pass_filenames: true
+        additional_dependencies: []
+
+      - id: prettier-check
+        name: Prettier check
+        language: node
+        entry: pnpm exec prettier --check
+        types_or: [javascript, ts, file]
+        files: \.(js|ts|svelte|css|json|html)$
+        exclude: >-
+          (?x)^(
+            pnpm-lock\.yaml|
+            messages/.*\.json|
+            src/lib/paraglide/.*
+          )$
+        pass_filenames: true
+
+      - id: svelte-check
+        name: svelte-check
+        language: node
+        entry: pnpm exec svelte-check --tsconfig ./tsconfig.json --threshold warning
+        pass_filenames: false
+        types_or: [file]
+        files: \.(svelte|ts|js)$
+
+      - id: vitest
+        name: Vitest unit tests
+        language: node
+        entry: pnpm exec vitest run --bail 1
+        pass_filenames: false
+        types_or: [file]
+        files: \.(ts|js|svelte)$

@@ -1,0 +1,18 @@
+node_modules
+.svelte-kit
+build
+static
+pnpm-lock.yaml
+messages/*.json
+docs/phase1/screenshots
+src/lib/paraglide
+
+# Pre-existing files from parallel agents (formatting deferred to phase 2)
+docs/
+project.inlang/
+src/app.css
+src/content/
+src/lib/data/
+src/lib/i18n/
+src/lib/styles/
+src/params/

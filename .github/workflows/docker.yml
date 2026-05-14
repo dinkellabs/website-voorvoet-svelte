@@ -1,0 +1,48 @@
+name: Docker build (PR validation)
+
+# Pull-request validation only. The publish-on-main job lives in
+# docker-publish.yml — running both on main would duplicate the build.
+# Path-filtered: editing docs/, messages/, or src/ alone does not rebuild
+# the image. Anything that affects what ships into the container does.
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.dockerignore'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.env.example'
+      - '.github/workflows/docker.yml'
+
+jobs:
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate docker-compose against .env.example
+        run: |
+          # Source .env.example so any new ${VAR:?...} requirements added to
+          # docker-compose.yml fail CI here, not on the production box.
+          set -a
+          # shellcheck disable=SC1091
+          source .env.example
+          set +a
+          docker compose config -q
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: voorvoet-website:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

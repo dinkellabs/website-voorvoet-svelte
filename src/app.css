@@ -1,0 +1,165 @@
+@import "./lib/styles/tokens.css";
+
+/* ============================================================
+   Self-hosted Lato — must mirror OLD's cdnjs lato-font@3.0.0
+   weight-to-file mapping exactly. That package SHIFTS the weight
+   names by one step so each CSS weight maps to a heavier physical
+   cut than the standard Google/Adobe convention:
+
+       CSS weight   →   physical Lato cut
+       300              Light
+       400              Regular
+       500              SEMIBOLD       (not Medium)
+       600              BOLD           (not Semibold)
+       700              (undefined — falls back to 800 = Heavy)
+       800              Heavy
+       900              Black
+
+   So `font-weight: 600` on OLD renders with real Lato Bold, and
+   `font-weight: 700` falls back through to Lato Heavy. Without the
+   same mapping, NEW renders every semibold/bold one step lighter
+   than OLD and the page reads visibly thinner.
+
+   Weight 700 is intentionally NOT declared so the browser falls
+   back to the nearest heavier face (800 = Heavy), matching OLD.
+   ============================================================ */
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/lato-light.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/lato-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/lato-italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/lato-semibold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/lato-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/lato-heavy.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/lato-black.woff2") format("woff2");
+}
+
+/* ============================================================
+   Modern minimal reset
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  hanging-punctuation: first last;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-regular);
+  color: var(--color-text-content);
+  background-color: var(--color-bg-white);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100svh;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+h1 { font-size: var(--font-size-h1); }
+h2 { font-size: var(--font-size-h2); }
+h3 { font-size: var(--font-size-h3); }
+h4 { font-size: var(--font-size-h4); }
+h5 { font-size: var(--font-size-h5); }
+h6 { font-size: var(--font-size-h6); }
+
+/* OLD's Radix UI Themes applies a small negative tracking (-1/160 em) to
+   every heading. Without this, NEW's headings render slightly wider — most
+   visible on the hero subtitle "Loop er niet mee door!" where the looser
+   spacing pushes the right edge ~4px past the OLD layout. */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.00625em;
+}
+
+a {
+  color: var(--color-text-link);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Focus visible ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-primary-300);
+  outline-offset: 2px;
+}

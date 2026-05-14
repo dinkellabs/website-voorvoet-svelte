@@ -1,0 +1,244 @@
+/* ============================================================
+   VoorVoet Design Tokens
+   Source: OLD/voorvoet_website/theme.py + REQUIREMENTS §5
+   Responsive arrays from theme.py: [initial, sm(640), md(768), lg(1024)]
+   converted to clamp() or media-query blocks.
+   ============================================================ */
+
+:root {
+  /* ----------------------------------------------------------
+     Colors — Primary brand (teal/green)
+     ---------------------------------------------------------- */
+  --color-primary-50: #ffffff;
+  --color-primary-100: #d1fae5;
+  --color-primary-300: #05a8a2;
+  --color-primary-500: #05847c;
+  --color-primary-700: #005152;
+
+  /* --color-btn-primary: white-text button bg that meets WCAG AA 3:1 large-text.
+     #05847c (#primary-500) gives 4.53:1 with white — passes both large and normal text. */
+  --color-btn-primary: #05847c;
+  --color-btn-primary-hover: #005152;
+
+  /* ----------------------------------------------------------
+     Colors — Backgrounds
+     ---------------------------------------------------------- */
+  --color-bg-white: #ffffff;
+  --color-bg-green-light: #dcedec;
+
+  /* ----------------------------------------------------------
+     Colors — Text
+     ---------------------------------------------------------- */
+  --color-text-heading: #111827;
+  --color-text-subheading: #1f2937;
+  --color-text-content: #131f1e;
+  --color-text-white: #ffffff;
+  --color-text-muted: #666666;
+  --color-text-placeholder: #888888;
+  --color-text-secondary: #4a4a4a;
+  --color-text-link: #1d4ed8;
+
+  /* ----------------------------------------------------------
+     Colors — Borders
+     ---------------------------------------------------------- */
+  --color-border-light: #f3f4f6;
+
+  /* ----------------------------------------------------------
+     Colors — Semantic
+     ---------------------------------------------------------- */
+  --color-error: #ef4444;
+  --color-success: #05847c;
+
+  /* ----------------------------------------------------------
+     Typography — Family
+     ---------------------------------------------------------- */
+  --font-family: "Lato", ui-sans-serif, system-ui, sans-serif;
+
+  /* ----------------------------------------------------------
+     Typography — Fixed sizes (theme.py: FontSizes)
+     ---------------------------------------------------------- */
+  --font-size-regular: 1.125rem;     /* FontSizes.regular */
+  --font-size-button: 1.5rem;        /* FontSizes.button */
+  --font-size-nav: 1.25rem;          /* FontSizes.nav_link */
+  --font-size-card-title: 1.25rem;   /* FontSizes.card_title */
+  --font-size-body-accent: 1.25rem;  /* FontSizes.body_accent */
+
+  /* ----------------------------------------------------------
+     Typography — Responsive sizes (initial values)
+     OLD uses Reflex 4-array breakpoints: [base, 640px, 768px, 1024px+].
+     We mirror that exactly via media-query overrides below — clamp()
+     never reaches the OLD lg values until very wide viewports.
+     ---------------------------------------------------------- */
+
+  /* FontSizes.section_title — base */
+  --font-size-section-title: 1.5rem;
+
+  /* FontSizes.section_sub_title — base */
+  --font-size-section-subtitle: 1.25rem;
+
+  /* FontSizes.small — base */
+  --font-size-small: 1rem;
+
+  /* FontSizes.hero_title — base */
+  --font-size-hero-title: 2.5rem;
+
+  /* FontSizes.hero_subtitle — base */
+  --font-size-hero-subtitle: 1.75rem;
+
+  /* FontSizes.hero_cta_title — base */
+  --font-size-hero-cta-title: 1.25rem;
+
+  /* FontSizes.heading_h1 — base */
+  --font-size-h1: 1.375rem;
+
+  /* FontSizes.heading_h2 — base */
+  --font-size-h2: 1.25rem;
+
+  /* FontSizes.heading_h3 — base */
+  --font-size-h3: 1.125rem;
+
+  /* FontSizes.heading_h4-h6 — base */
+  --font-size-h4: 1rem;
+  --font-size-h5: 1rem;
+  --font-size-h6: 1rem;
+
+  /* ----------------------------------------------------------
+     Spacing — Fixed
+     ---------------------------------------------------------- */
+  --spacing-section-vertical: 8rem;    /* Spacing.section_vertical — base padding for sections (clip-aware in Section.svelte); reduced at lg+ where header is taller */
+  --spacing-grid-gap: 2rem;            /* Spacing.grid_gap */
+  --spacing-section-gap: 2rem;         /* Spacing.section_gap */
+  --spacing-card: 3rem;                /* Spacing.card_spacing */
+  --spacing-image-margin-bottom: 2rem; /* Spacing.image_margin_bottom */
+  --spacing-text-margin-bottom: 1rem;  /* Spacing.text_margin_bottom */
+  --spacing-button-margin-top: 1.5rem; /* Spacing.button_margin_top */
+
+  /* Blog spacing */
+  --spacing-blog-heading-top: 2rem;        /* Spacing.blog_heading_margin_top */
+  --spacing-blog-heading-bottom: 1.5rem;   /* Spacing.blog_heading_margin_bottom */
+  --spacing-blog-content-bottom: 0.5rem;   /* Spacing.blog_content_margin_bottom */
+  --spacing-blog-image: 2rem auto;         /* Spacing.blog_image_margin */
+  --spacing-blog-caption-top: 0.5rem;      /* Spacing.blog_caption_margin_top */
+
+  /* ----------------------------------------------------------
+     Spacing — Responsive (clamp)
+     ---------------------------------------------------------- */
+
+  /* Spacing.container_padding — base */
+  --spacing-container-padding: 1rem;
+
+  /* Spacing.hero_cta_padding — base */
+  --spacing-hero-cta-padding: 1rem;
+
+  /* Spacing.form_padding — base */
+  --spacing-form-padding: 1.5rem;
+
+  /* ----------------------------------------------------------
+     Layout — Fixed
+     ---------------------------------------------------------- */
+  --header-height: 68px;           /* Logo ~66px (narrow viewport) + 1px border; synced with Header.svelte */
+  --max-width: 1200px;             /* Layout.max_width */
+  --card-max-width: 350px;         /* Layout.card_max_width */
+  --card-min-width: 280px;         /* Layout.card_min_width */
+  --image-max-width: 333px;        /* Layout.image_max_width */
+  --image-border-radius: 4px;      /* Layout.image_border_radius */
+  --image-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Layout.image_box_shadow */
+  --blog-image-max-width: 800px;   /* Layout.blog_image_max_width */
+  --blog-image-border-radius: 8px; /* Layout.blog_image_border_radius */
+
+  /* ----------------------------------------------------------
+     Layout — Hero (responsive via clamp)
+     Layout.hero_min_height: OLD uses 500px image for sub-pages, 850px for home.
+     Since sub-pages set minHeight="340px" explicitly (not the token), this token
+     applies only to home and blog. Target: blog hero + header ≈ 500px (OLD match).
+     With header ≈ 101px, hero token should be ~303px so 101+303+96px section padding = 500px.
+     Home hero is content-driven (title+subtitle+CTA) and will render taller than min.
+     Layout.hero_cta_width: ["95%", "28rem", "32rem", "36rem"]
+     Layout.hero_cta_max_width: ["95%", "90%", "85%", "38rem"]
+     These are discrete breakpoint values — kept as CSS vars
+     and overridden in media queries below.
+     ---------------------------------------------------------- */
+  --hero-min-height: 303px;
+  --hero-cta-width: 95%;
+  --hero-cta-max-width: 95%;
+
+  /* ----------------------------------------------------------
+     Breakpoints (reference only — use in media queries)
+     ---------------------------------------------------------- */
+  /* --bp-sm: 640px  */
+  /* --bp-md: 768px  */
+  /* --bp-lg: 1024px */
+}
+
+/* ============================================================
+   Responsive overrides — match OLD theme.py 4-array breakpoints
+   exactly: [base, 640px (sm), 768px (md), 1024px+ (lg)].
+   ============================================================ */
+
+@media (min-width: 640px) {
+  :root {
+    --hero-cta-width: 28rem;
+    --hero-cta-max-width: 90%;
+    --font-size-section-title: 1.75rem;
+    --font-size-section-subtitle: 1.5rem;
+    --font-size-small: 1.125rem;
+    --font-size-hero-title: 4rem;
+    --font-size-hero-subtitle: 2.25rem;
+    --font-size-hero-cta-title: 1.375rem;
+    --font-size-h1: 1.5rem;
+    --font-size-h2: 1.375rem;
+    --font-size-h3: 1.25rem;
+    --font-size-h4: 1.125rem;
+    --font-size-h5: 1.125rem;
+    --font-size-h6: 1.125rem;
+    --spacing-container-padding: 1.5rem;
+    --spacing-hero-cta-padding: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --hero-cta-width: 32rem;
+    --hero-cta-max-width: 85%;
+    --font-size-section-title: 2rem;
+    --font-size-section-subtitle: 1.75rem;
+    --font-size-small: 1.375rem;
+    --font-size-hero-title: 5rem;
+    --font-size-hero-subtitle: 2.5rem;
+    --font-size-hero-cta-title: 1.5rem;
+    --font-size-h1: 1.75rem;
+    --font-size-h2: 1.5rem;
+    --font-size-h3: 1.375rem;
+    --font-size-h4: 1.25rem;
+    --font-size-h5: 1.25rem;
+    --font-size-h6: 1.25rem;
+    --spacing-container-padding: 2rem;
+    --spacing-hero-cta-padding: 1.75rem;
+    --spacing-form-padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --hero-cta-width: 36rem;
+    --hero-cta-max-width: 38rem;
+    --font-size-section-title: 2.25rem;
+    --font-size-section-subtitle: 1.875rem;
+    --font-size-small: 1.5rem;
+    --font-size-hero-title: 6rem;
+    --font-size-hero-subtitle: 2.7rem;
+    --font-size-hero-cta-title: 1.625rem;
+    --font-size-h1: 1.875rem;
+    --font-size-h2: 1.625rem;
+    --font-size-h3: 1.5rem;
+    --font-size-h4: 1.375rem;
+    --font-size-h5: 1.375rem;
+    --font-size-h6: 1.375rem;
+    --spacing-hero-cta-padding: 2rem;
+    --spacing-form-padding: 2.5rem;
+    /* At lg+ the logo reaches 300px wide (100px tall); header = 101px.
+       Section padding reduced to 6rem to compensate for taller header. */
+    --header-height: 101px;
+    --spacing-section-vertical: 6rem;
+  }
+}

@@ -1,0 +1,66 @@
+VoorVoet website (website-voorvoet-svelte)
+Copyright 2026 Dinkellabs
+
+This product includes software developed by Dinkellabs
+(https://github.com/dinkellabs/website-voorvoet-svelte).
+
+================================================================================
+SCOPE OF THE APACHE LICENSE 2.0
+================================================================================
+
+The Apache License 2.0 in the accompanying LICENSE file covers the source code
+of this project: everything in src/lib/, src/routes/, src/hooks.server.ts,
+src/params/, src/app.{html,css,d.ts}, e2e/, scripts/, lighthouse/,
+and all top-level configuration files (Dockerfile, *.config.*,
+package.json, etc.).
+
+================================================================================
+THIRD-PARTY CONTENT — NOT COVERED BY THE APACHE LICENSE
+================================================================================
+
+The following paths contain content owned by VoorVoet — Praktijk voor
+Podotherapie (the operator of voorvoet.nl). They are included in this
+repository solely because the application requires them to run, and are
+NOT licensed for reuse, redistribution, or derivative works:
+
+  static/images/**          Photography of the practice, practitioner, and
+                            anatomical illustrations. Copyright VoorVoet
+                            and the respective photographers.
+
+  static/documents/**       Algemene voorwaarden and privacy beleid PDFs.
+                            Copyright VoorVoet.
+
+  static/favicon*           Brand marks and favicons. Copyright VoorVoet.
+  static/apple-touch-icon.png
+  static/web-app-manifest-*.png
+  static/site.webmanifest
+
+  src/content/blog/**       Blog post text. Copyright VoorVoet and the
+                            respective authors.
+
+  src/content/legal/**      Terms and privacy text. Copyright VoorVoet.
+
+  messages/{nl,de,en}.json  Practice-specific UI copy (business name,
+                            contact details, practitioner credentials).
+                            Generic UI scaffolding strings within these
+                            files are covered by the Apache License; the
+                            practice-specific copy is not.
+
+All rights to the above are reserved by VoorVoet. To use, adapt, or
+redistribute any of this content, contact the copyright holder.
+
+================================================================================
+THIRD-PARTY FONTS
+================================================================================
+
+static/fonts/lato-*.woff2
+  Lato typeface by Łukasz Dziedzic, licensed under the SIL Open Font
+  License, Version 1.1. See https://scripts.sil.org/OFL.
+
+================================================================================
+THIRD-PARTY DEPENDENCIES
+================================================================================
+
+This project depends on third-party npm packages declared in package.json.
+Each dependency retains its own license; consult its package metadata or
+the project's node_modules directory for details.

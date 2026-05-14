@@ -1,0 +1,39 @@
+# Secrets — never ship into the build context
+.env
+.env.*
+!.env.example
+
+# Git metadata
+.git
+.gitignore
+.github
+
+# Local dev / build artifacts (rebuilt inside the container)
+node_modules
+build
+.svelte-kit
+
+# Test artifacts
+coverage
+playwright-report
+test-results
+.lighthouseci
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+
+# Docs and tests not needed at runtime
+docs
+e2e
+*.md
+!README.md
+
+# Misc
+.prettier*
+.editorconfig
+.pre-commit-config.yaml
+Dockerfile
+docker-compose.yml
+Makefile

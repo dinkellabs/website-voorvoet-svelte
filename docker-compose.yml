@@ -1,0 +1,71 @@
+# Single-service stack for the SvelteKit app.
+#
+# TLS termination and HTTP routing are NOT handled here — this container is
+# designed to sit behind an upstream reverse proxy (the host's Nginx/Caddy/
+# Traefik/etc.) that terminates TLS and forwards traffic to port 3000.
+#
+# Two common exposure patterns:
+#   1. Upstream proxy on the host: add `ports: ['127.0.0.1:3000:3000']` so
+#      only the host can reach the app.
+#   2. Upstream proxy in Docker: attach the app to the proxy's network via
+#      `networks: { <proxy-net>: { external: true } }` and drop `expose:`.
+#
+# Pick one in a compose override (docker-compose.override.yml) — keeping the
+# base file proxy-agnostic.
+
+services:
+  app:
+    image: ghcr.io/dinkellabs/website-voorvoet-svelte:latest
+    # `docker compose up --build` rebuilds from the local Dockerfile and
+    # retags the image above. `docker compose up` (no --build) pulls from
+    # GHCR — the deploy-time default.
+    build: .
+    expose:
+      - '3000'
+    env_file:
+      - .env
+    environment:
+      # Trust X-Forwarded-* from the upstream reverse proxy so
+      # event.getClientAddress() returns the real client IP, not the
+      # proxy's container/bridge IP. Without these, the rate limiter,
+      # Turnstile remoteip, and Umami forwarded-for all collapse to a
+      # single global bucket.
+      #
+      # XFF_DEPTH counts proxies in front of the app:
+      #   1 = one proxy (typical: host's Nginx/Caddy)
+      #   2 = two proxies (e.g. Cloudflare → host proxy → app)
+      ADDRESS_HEADER: x-forwarded-for
+      XFF_DEPTH: '1'
+      PROTOCOL_HEADER: x-forwarded-proto
+      HOST_HEADER: x-forwarded-host
+      BODY_SIZE_LIMIT: '524288'
+      TZ: Europe/Amsterdam
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    init: true
+    stop_grace_period: 35s
+    mem_limit: 1g
+    mem_reservation: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3000/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
