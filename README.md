@@ -39,21 +39,21 @@ pnpm dev
 
 ## Common Commands
 
-| Command                                            | Purpose                                     |
-| -------------------------------------------------- | ------------------------------------------- |
-| `pnpm dev`                                         | Dev server at :5173                         |
-| `pnpm build`                                       | Production build                            |
-| `pnpm preview`                                     | Serve production build at :4173             |
-| `pnpm test`                                        | Unit tests (Vitest)                         |
-| `pnpm test:coverage`                               | Unit tests with coverage                    |
-| `pnpm e2e`                                         | E2E tests (needs `pnpm preview` running)    |
-| `pnpm lint`                                        | ESLint — zero warnings                      |
-| `pnpm format`                                      | Prettier write                              |
-| `pnpm format:check`                                | Prettier check                              |
-| `pnpm check`                                       | svelte-check TypeScript check               |
-| `pnpm paraglide:compile`                           | Regenerate i18n from `messages/`            |
-| `pnpm version:sync`                                | Sync `package.json` from the `VERSION` file |
-| `pnpm lighthouse`                                  | Run Lighthouse CI                           |
+| Command                  | Purpose                                     |
+| ------------------------ | ------------------------------------------- |
+| `pnpm dev`               | Dev server at :5173                         |
+| `pnpm build`             | Production build                            |
+| `pnpm preview`           | Serve production build at :4173             |
+| `pnpm test`              | Unit tests (Vitest)                         |
+| `pnpm test:coverage`     | Unit tests with coverage                    |
+| `pnpm e2e`               | E2E tests (needs `pnpm preview` running)    |
+| `pnpm lint`              | ESLint — zero warnings                      |
+| `pnpm format`            | Prettier write                              |
+| `pnpm format:check`      | Prettier check                              |
+| `pnpm check`             | svelte-check TypeScript check               |
+| `pnpm paraglide:compile` | Regenerate i18n from `messages/`            |
+| `pnpm version:sync`      | Sync `package.json` from the `VERSION` file |
+| `pnpm lighthouse`        | Run Lighthouse CI                           |
 
 ## Project Structure
 
