@@ -1,0 +1,92 @@
+name: Prune old container versions
+
+# What this does
+# ───────────────
+# Every Sunday at 03:00 UTC (and on manual dispatch):
+#   • Keeps the newest 10 `dev-<sha>` immutable images.
+#   • Deletes all untagged (orphaned) versions — these accumulate every
+#     time the rolling `:dev` tag is overwritten.
+#   • NEVER touches versions tagged `latest`, `dev` (the rolling tag),
+#     or a semver release (e.g. `0.1.2`).
+#
+# Safety
+# ──────
+# The first time you enable this, run it manually from the Actions tab
+# with `dry-run: true` to see what would be deleted. Once happy with the
+# output, schedule takes over.
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      keep:
+        description: How many newest dev-<sha> versions to keep
+        type: string
+        default: '10'
+      dry-run:
+        description: Preview deletions without removing anything
+        type: boolean
+        default: false
+
+permissions:
+  packages: write
+
+env:
+  PACKAGE: website-voorvoet-svelte
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prune
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KEEP: ${{ inputs.keep || '10' }}
+          DRY_RUN: ${{ inputs.dry-run || 'false' }}
+        run: |
+          set -euo pipefail
+          owner="${{ github.repository_owner }}"
+
+          versions=$(gh api --paginate \
+            "/users/$owner/packages/container/$PACKAGE/versions")
+          echo "Total versions in registry: $(echo "$versions" | jq 'length')"
+
+          # Versions to delete:
+          #   1) Untagged (orphaned) — every one of them.
+          #   2) Versions whose tags are all `dev-<7hex>` — keep newest $KEEP, delete the rest.
+          # Versions tagged `latest`, `dev` (rolling), or a semver are excluded.
+          to_delete=$(echo "$versions" | jq -r --argjson keep "$KEEP" '
+            (
+              [.[] | select(.metadata.container.tags | length == 0)]
+              +
+              ([.[] |
+                select(
+                  (.metadata.container.tags | length) > 0
+                  and (.metadata.container.tags | all(test("^dev-[0-9a-f]{7}$")))
+                )
+              ] | sort_by(.created_at) | reverse | .[$keep:])
+            )
+            | .[] | .id
+          ')
+
+          if [ -z "$to_delete" ]; then
+            echo "Nothing to prune."
+            exit 0
+          fi
+
+          count=$(echo "$to_delete" | wc -l | tr -d ' ')
+          echo "Pruning $count versions (keep newest $KEEP dev-<sha>, drop all untagged)."
+
+          for id in $to_delete; do
+            tags=$(echo "$versions" | jq -r --argjson id "$id" \
+              '.[] | select(.id == $id) | .metadata.container.tags | join(",")')
+            label="${tags:-<untagged>}"
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[dry-run] would delete version $id ($label)"
+            else
+              echo "deleting version $id ($label)"
+              gh api --method DELETE \
+                "/users/$owner/packages/container/$PACKAGE/versions/$id"
+            fi
+          done
