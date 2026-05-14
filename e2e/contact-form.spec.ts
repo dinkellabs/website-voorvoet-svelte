@@ -20,11 +20,14 @@ test.describe('Contact form', () => {
   test('fill and submit nl/contact → success toast + email delivered', async ({ page }) => {
     await page.goto('/nl/contact');
     await page.waitForSelector('form.contact-form');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
 
-    // Select request type "Contact per email"
-    await page.selectOption('#request_type', 'Contact per email');
+    // request_type is a radio group, not a <select>
+    await page.check('input[name="request_type"][value="Contact per email"]');
 
-    await page.fill('#name', 'Test Gebruiker');
+    await page.fill('#name', 'Test');
+    await page.fill('#last_name', 'Gebruiker');
     await page.fill('#email', 'test@voorbeeld.nl');
     await page.fill('#phone', '0612345678');
     await page.fill('#description', 'Dit is een testbericht van de E2E suite.');
@@ -46,9 +49,11 @@ test.describe('Contact form', () => {
   test('fill and submit nl/contact with "Bel mij terug" request type', async ({ page }) => {
     await page.goto('/nl/contact');
     await page.waitForSelector('form.contact-form');
+    await page.waitForLoadState('networkidle');
 
-    await page.selectOption('#request_type', 'Bel mij terug');
-    await page.fill('#name', 'Bel Mij');
+    await page.check('input[name="request_type"][value="Bel mij terug"]');
+    await page.fill('#name', 'Bel');
+    await page.fill('#last_name', 'Mij');
     await page.fill('#email', 'bel@test.nl');
     await page.fill('#phone', '0612345678');
     await page.fill('#description', 'Graag terugbellen.');
@@ -66,9 +71,11 @@ test.describe('Contact form', () => {
   test('de/kontakt form submits and shows German success toast', async ({ page }) => {
     await page.goto('/de/kontakt');
     await page.waitForSelector('form.contact-form');
+    await page.waitForLoadState('networkidle');
 
-    await page.selectOption('#request_type', 'Contact per email');
-    await page.fill('#name', 'Test Nutzer');
+    await page.check('input[name="request_type"][value="Contact per email"]');
+    await page.fill('#name', 'Test');
+    await page.fill('#last_name', 'Nutzer');
     await page.fill('#email', 'test@beispiel.de');
     await page.fill('#phone', '0612345678');
     await page.fill('#description', 'Das ist eine Testnachricht.');

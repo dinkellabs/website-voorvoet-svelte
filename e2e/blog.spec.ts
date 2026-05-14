@@ -28,7 +28,8 @@ test.describe('Blog index', () => {
   for (const lang of LANGUAGES) {
     test(`${lang} blog index shows 3 posts`, async ({ page }) => {
       await page.goto(BLOG_ROUTES[lang]!);
-      const cards = page.locator('.blog-card');
+      // Blog index uses the horizontal BlogCard variant (`.blog-card-h`).
+      const cards = page.locator('.blog-card-h');
       await expect(cards).toHaveCount(3);
     });
 
@@ -45,7 +46,7 @@ test.describe('Blog post navigation', () => {
       await page.goto(BLOG_ROUTES[lang]!);
 
       // Click the first blog card's read-more link
-      const firstCard = page.locator('.blog-card').first();
+      const firstCard = page.locator('.blog-card-h').first();
       const readMoreLink = firstCard.locator('a').first();
       const postHref = await readMoreLink.getAttribute('href');
       expect(postHref).toMatch(new RegExp(`/${lang}/blog/`));

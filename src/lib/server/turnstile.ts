@@ -11,10 +11,15 @@ const DUMMY_ALWAYS_PASS_SITE_KEY = '1x00000000000000000000AA';
 // `building` is true during `vite build`'s analyse pass; env vars aren't
 // loaded then. Skip the production guard so the build doesn't trip.
 const isProduction = !dev && !building;
+
+// E2E escape valve: playwright runs `node build/index.js` (isProduction=true)
+// but with bot protection disabled. Setting TURNSTILE_DUMMY_MODE=always_pass
+// bypasses the production guards. NEVER set this in real production.
+const dummyMode = env.TURNSTILE_DUMMY_MODE === 'always_pass';
 const turnstileEnabled = (env.TURNSTILE_ENABLED ?? 'false').toLowerCase() === 'true';
 const usingDummySiteKey = pubEnv.PUBLIC_TURNSTILE_SITE_KEY === DUMMY_ALWAYS_PASS_SITE_KEY;
 
-if (isProduction) {
+if (isProduction && !dummyMode) {
   if (!turnstileEnabled) {
     throw new Error(
       'TURNSTILE_ENABLED must be exactly "true" in production. Refusing to start with bot protection disabled.',

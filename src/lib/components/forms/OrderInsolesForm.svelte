@@ -43,6 +43,13 @@
 
   const siteKey = env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
 
+  // When Turnstile is not configured (no site key), the form ships a hidden
+  // `turnstileToken=disabled` field. Seed the client store to match so
+  // zodClient's `min(1)` validation doesn't silently block submission.
+  if (!siteKey && !$form.turnstileToken) {
+    $form.turnstileToken = 'disabled';
+  }
+
   function handleTurnstileCallback(token: string) {
     $form.turnstileToken = token;
   }

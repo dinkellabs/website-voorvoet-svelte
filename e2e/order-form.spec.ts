@@ -17,14 +17,20 @@ async function fillAndSubmitOrder(
   const url = options.url ?? '/nl/zolen-bestellen';
   await page.goto(url);
   await page.waitForSelector('form.order-form');
+  await page.waitForLoadState('networkidle');
+  // Hydration race: wait until use:enhance has attached. We detect this by
+  // dispatching a synthetic, non-submit-triggering click on a sentinel and
+  // checking that the form has at least one submit-event listener installed
+  // by polling for a known side effect. The pragmatic substitute is a longer
+  // explicit wait; enhance attaches on mount which is well within 3 s.
+  await page.waitForTimeout(3000);
 
   await page.fill('#first_name', 'Jan');
   await page.fill('#last_name', 'Jansen');
   await page.fill('#email', 'jan@jansen.nl');
-  await page.fill('#phone', '0612345678');
   await page.fill('#birth_date', '01-01-1985');
-  await page.selectOption('#insole_type', options.insoleType);
-  await page.fill('#quantity', String(options.quantity));
+  await page.selectOption('#quantity', String(options.quantity));
+  await page.check(`input[name="insole_type"][value="${options.insoleType}"]`);
 
   await page.click('button[type="submit"]');
 }

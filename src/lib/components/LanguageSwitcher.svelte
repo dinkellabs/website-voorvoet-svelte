@@ -42,12 +42,16 @@
   }
 
   $effect(() => {
-    if (open) {
+    if (!open) return;
+    // Defer attaching the listener so the same click that opened the menu
+    // doesn't immediately bubble to document and close it. Svelte 5 flushes
+    // $effect synchronously during the click, which would otherwise let the
+    // outside-click handler fire on the very click that toggled `open`.
+    const timer = globalThis.setTimeout(() => {
       globalThis.document.addEventListener('click', handleOutsideClick);
-    } else {
-      globalThis.document.removeEventListener('click', handleOutsideClick);
-    }
+    }, 0);
     return () => {
+      globalThis.clearTimeout(timer);
       globalThis.document.removeEventListener('click', handleOutsideClick);
     };
   });
@@ -98,11 +102,19 @@
   {#if open}
     <div class="lang-switcher__menu" role="menu" aria-label={m.lang_switcher_label()}>
       {#each languageRoutes as lang (lang.code)}
+        <!--
+          data-sveltekit-reload forces a full document navigation rather
+          than client-side routing, so the server-rendered <html lang>
+          attribute (and any other lang-dependent SSR output) refreshes.
+          Without it, swapping language client-side leaves html[lang]
+          stale.
+        -->
         <a
           href={lang.href}
           class="lang-switcher__option"
           class:lang-switcher__option--active={lang.code === currentLang}
           role="menuitem"
+          data-sveltekit-reload
           onclick={() => (open = false)}
         >
           <span class="lang-switcher__option-flag" aria-hidden="true">{lang.flag}</span>

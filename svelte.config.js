@@ -26,6 +26,29 @@ const config = {
   kit: {
     adapter: adapter(),
     version: { name: APP_VERSION },
+    // CSP. `mode: 'auto'` adds nonces in dev and SHA-256 hashes in
+    // production builds for SvelteKit's own inline scripts (the hydration
+    // bootstrapper, `__sveltekit_...` init blocks, JSON-LD, etc.). Without
+    // this, the page renders SSR-only — no client hydration, no enhanced
+    // forms, no toasts. Dynamic origins (Umami) are appended in
+    // `hooks.server.ts` after SvelteKit sets the header.
+    csp: {
+      mode: 'auto',
+      directives: {
+        'default-src': ['self'],
+        'script-src': ['self', 'https://challenges.cloudflare.com'],
+        'style-src': ['self', 'unsafe-inline'],
+        'img-src': ['self', 'data:'],
+        'connect-src': ['self', 'https://challenges.cloudflare.com'],
+        'frame-src': ['https://challenges.cloudflare.com', 'https://www.google.com'],
+        'font-src': ['self'],
+        'object-src': ['none'],
+        'base-uri': ['self'],
+        'form-action': ['self'],
+        'frame-ancestors': ['none'],
+        'report-uri': ['/csp-report'],
+      },
+    },
   },
 };
 

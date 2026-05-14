@@ -33,45 +33,29 @@ if (!dev && !building) {
 
 // ─── CSP ─────────────────────────────────────────────────────────────────────
 
-function buildCsp(): string {
+// The base CSP (with auto-computed hashes for SvelteKit's inline scripts) is
+// set by SvelteKit itself via `kit.csp.directives` in svelte.config.js. We only
+// append origins that depend on runtime env vars (Umami's URLs) by editing the
+// header SvelteKit already wrote.
+function appendUmamiToCsp(existing: string): string {
   const umamiScriptOrigin = pubEnv.PUBLIC_UMAMI_SCRIPT_URL
     ? new URL(pubEnv.PUBLIC_UMAMI_SCRIPT_URL).origin
     : null;
-
   const umamiApiOrigin = env.UMAMI_API_URL ? new URL(env.UMAMI_API_URL).origin : null;
 
-  const turnstileOrigin = 'https://challenges.cloudflare.com';
-  const googleMapsOrigin = 'https://www.google.com';
+  if (!umamiScriptOrigin && !umamiApiOrigin) return existing;
 
-  const scriptSrc = [
-    "'self'",
-    turnstileOrigin,
-    ...(umamiScriptOrigin ? [umamiScriptOrigin] : []),
-  ].join(' ');
+  const scriptAdditions = umamiScriptOrigin ? ` ${umamiScriptOrigin}` : '';
+  const connectAdditions = [umamiScriptOrigin, umamiApiOrigin].filter(Boolean).join(' ');
 
-  const connectSrc = [
-    "'self'",
-    turnstileOrigin,
-    ...(umamiApiOrigin ? [umamiApiOrigin] : []),
-    ...(umamiScriptOrigin ? [umamiScriptOrigin] : []),
-  ].join(' ');
-
-  const directives = [
-    "default-src 'self'",
-    `script-src ${scriptSrc}`,
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data:",
-    `connect-src ${connectSrc}`,
-    `frame-src ${turnstileOrigin} ${googleMapsOrigin}`,
-    "font-src 'self'",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
-    'report-uri /csp-report',
-  ];
-
-  return directives.join('; ');
+  let updated = existing;
+  if (scriptAdditions) {
+    updated = updated.replace(/script-src ([^;]+)/, (_, srcs) => `script-src ${srcs}${scriptAdditions}`);
+  }
+  if (connectAdditions) {
+    updated = updated.replace(/connect-src ([^;]+)/, (_, srcs) => `connect-src ${srcs} ${connectAdditions}`);
+  }
+  return updated;
 }
 
 // ─── Handle ───────────────────────────────────────────────────────────────────
@@ -117,7 +101,13 @@ export const handle: Handle = async ({ event, resolve }) => {
   const isHtml = contentType.includes('text/html');
 
   if (isHtml) {
-    response.headers.set('Content-Security-Policy', buildCsp());
+    // SvelteKit set a CSP via `kit.csp.directives` (svelte.config.js) which
+    // already includes SHA-256 hashes for its inline hydration scripts.
+    // Append runtime-only origins (Umami) here.
+    const existingCsp = response.headers.get('Content-Security-Policy');
+    if (existingCsp) {
+      response.headers.set('Content-Security-Policy', appendUmamiToCsp(existingCsp));
+    }
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');

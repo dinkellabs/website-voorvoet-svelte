@@ -33,6 +33,7 @@ for (const pageKey of PAGE_KEYS) {
   test(`language switching on /${pageKey} page`, async ({ page }) => {
     // Start on NL
     await page.goto(ROUTE_MAP[pageKey]['nl']);
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
 
     // Verify hreflang links exist for nl, de, en, x-default
@@ -69,6 +70,7 @@ for (const pageKey of PAGE_KEYS) {
 
 test('language switcher on home shows all 3 options', async ({ page }) => {
   await page.goto('/nl');
+  await page.waitForLoadState('networkidle');
   const switcher = page.locator('.lang-switcher__trigger');
   await switcher.click();
   const menu = page.locator('.lang-switcher__menu');

@@ -2,6 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types.js';
 import { LANGS, langFromParams, routeFor } from '$lib/i18n/route-map.js';
 import { getPostsByLang } from '$lib/blog/loader.js';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS } from '$lib/i18n/page-meta.js';
 
 const POSTS_PER_PAGE = 6;
 
@@ -39,8 +40,8 @@ export const load: PageServerLoad = ({ params, url }) => {
     totalPages,
     blogBase,
     meta: {
-      title: `Blog — VoorVoet`,
-      description: `Blog artikelen van VoorVoet podotherapie Enschede.`,
+      title: PAGE_TITLES[lang]['blog'],
+      description: PAGE_DESCRIPTIONS[lang]['blog'],
       canonical,
     },
     alternates,

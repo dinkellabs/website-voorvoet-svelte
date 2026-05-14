@@ -62,11 +62,24 @@ export default defineConfig({
       // Node adapter default port
       PORT: '3000',
       HOST: '0.0.0.0',
-      // Turnstile: server-side auto-pass
+      // adapter-node defaults its url.origin protocol to `https` when
+      // PROTOCOL_HEADER isn't set. Without an explicit ORIGIN here, every
+      // form POST gets CSRF-rejected (browser sends `Origin: http://...`,
+      // server compares against `https://...`).
+      ORIGIN: 'http://localhost:3000',
+      // Order spec submits 7 forms in a row; production 5-per-10-min cap
+      // would fail the suite. See src/lib/server/rate-limiter.ts.
+      E2E_DISABLE_RATE_LIMITER: 'true',
+      // Turnstile: server-side auto-pass. Intentionally leave
+      // PUBLIC_TURNSTILE_SITE_KEY empty so the form renders the hidden
+      // `turnstileToken=disabled` input instead of mounting the real
+      // Cloudflare widget — the live widget makes requests to
+      // challenges.cloudflare.com which never settle in CI and stall
+      // `waitForLoadState('networkidle')`.
       TURNSTILE_ENABLED: 'false',
       TURNSTILE_DUMMY_MODE: 'always_pass',
       TURNSTILE_SECRET_KEY: '1x0000000000000000000000000000000AA',
-      PUBLIC_TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
+      PUBLIC_TURNSTILE_SITE_KEY: '',
       // SMTP mock: point at a port that accepts+drops mail (started in globalSetup)
       SMTP_HOST: '127.0.0.1',
       SMTP_PORT: '2525',

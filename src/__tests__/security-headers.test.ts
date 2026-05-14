@@ -30,15 +30,38 @@ function makeEvent(pathname: string) {
   } as unknown as Parameters<Handle>[0]['event'];
 }
 
+// Simulates the CSP header SvelteKit writes when `kit.csp.directives` is
+// configured. The real framework also auto-adds SHA-256 hashes for its inline
+// hydration scripts; we don't reproduce those here — the test only needs to
+// verify hooks.server.ts appends dynamic Umami origins correctly.
+const BASE_CSP = [
+  "default-src 'self'",
+  "script-src 'self' https://challenges.cloudflare.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "connect-src 'self' https://challenges.cloudflare.com",
+  'frame-src https://challenges.cloudflare.com https://www.google.com',
+  "font-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  'report-uri /csp-report',
+].join('; ');
+
 async function invokeHandle(pathname: string, contentType: string) {
   vi.doMock('$env/dynamic/private', () => ({ env: {} }));
   vi.doMock('$env/dynamic/public', () => ({ env: {} }));
   const { handle } = await import('../hooks.server.js');
   const event = makeEvent(pathname);
+  const headers: Record<string, string> = { 'content-type': contentType };
+  if (contentType.includes('text/html')) {
+    headers['content-security-policy'] = BASE_CSP;
+  }
   const resolve = vi.fn().mockResolvedValue(
     new Response('<html></html>', {
       status: 200,
-      headers: { 'content-type': contentType },
+      headers,
     }),
   );
   return handle({ event, resolve } as Parameters<typeof handle>[0]);
@@ -99,7 +122,10 @@ describe('CSP and security headers', () => {
     const resolve = vi.fn().mockResolvedValue(
       new Response('<html></html>', {
         status: 200,
-        headers: { 'content-type': 'text/html; charset=utf-8' },
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'content-security-policy': BASE_CSP,
+        },
       }),
     );
     const response = await handle({ event, resolve } as Parameters<typeof handle>[0]);
