@@ -1,7 +1,7 @@
 /**
  * Contact form spec.
  *
- * Fills and submits the NL contact form with TURNSTILE_ENABLED=false (auto-pass).
+ * Fills and submits the NL contact form with CAP_ENABLED=false (auto-pass).
  * Asserts:
  *   - Success toast appears with the correct Dutch message.
  *   - The SMTP catcher received an email with the expected subject line.

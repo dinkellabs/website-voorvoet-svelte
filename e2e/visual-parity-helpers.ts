@@ -77,7 +77,7 @@ export async function captureScreenshot(
   });
 
   // Use 'load' as primary wait strategy to avoid hanging on pages with iframes
-  // (Turnstile captcha, Google Maps) that never reach 'networkidle'.
+  // (Google Maps) that never reach 'networkidle'.
   // After load, give a generous settle window for fonts and lazy images.
   await browserPage.goto(url, { waitUntil: 'load', timeout: 60000 });
   await browserPage.evaluate(() => document.fonts.ready);

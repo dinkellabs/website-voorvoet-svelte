@@ -27,9 +27,8 @@ services:
     environment:
       # Trust X-Forwarded-* from the upstream reverse proxy so
       # event.getClientAddress() returns the real client IP, not the
-      # proxy's container/bridge IP. Without these, the rate limiter,
-      # Turnstile remoteip, and Umami forwarded-for all collapse to a
-      # single global bucket.
+      # proxy's container/bridge IP. Without these, the rate limiter
+      # and Umami forwarded-for collapse to a single global bucket.
       #
       # XFF_DEPTH counts proxies in front of the app:
       #   1 = one proxy (typical: host's Nginx/Caddy)

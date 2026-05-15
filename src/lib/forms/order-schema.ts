@@ -17,7 +17,7 @@ export const orderSchema = z.object({
   insole_type: z.enum(INSOLE_TYPES),
   quantity: z.coerce.number().int().min(1, 'quantity_invalid').max(3, 'quantity_invalid'),
   notes: z.string().max(1000, 'notes_too_long').optional().default(''),
-  turnstileToken: z.string().min(1, 'turnstile_required'),
+  capToken: z.string().min(1, 'cap_required'),
 });
 
 export type OrderFormData = z.infer<typeof orderSchema>;

@@ -60,6 +60,13 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      # Exposed for the `deploy` job: the *immutable* tag we just pushed
+      # (VERSION on main, dev-<sha7> on dev) and the matching service name
+      # the server's compose stack runs under. Floating tags (`latest`, `dev`)
+      # are never deployed — easy rollback requires fingerprinted tags.
+      deploy_tag: ${{ steps.deploy_target.outputs.tag }}
+      deploy_service: ${{ steps.deploy_target.outputs.service }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -121,3 +128,65 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Compute deploy target (service + immutable tag)
+        id: deploy_target
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            echo "service=voorvoeten-prod" >> "$GITHUB_OUTPUT"
+            echo "tag=${{ steps.version.outputs.value }}" >> "$GITHUB_OUTPUT"
+          elif [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            echo "service=voorvoeten-dev" >> "$GITHUB_OUTPUT"
+            echo "tag=dev-${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::unsupported branch ${GITHUB_REF} for deploy target computation"
+            exit 1
+          fi
+
+  deploy:
+    # Triggers the server to pull + restart only the affected service. The
+    # forced-command SSH key on the server makes the only thing this job
+    # can do `/opt/voorvoeten/deploy.sh <service> <tag>` — see
+    # dinkellabs-infra/infra/cloud-init/bootstrap.yaml.tftpl. Skipped on
+    # workflow_dispatch unless explicitly opted in (see if: below).
+    needs: build-and-push
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: SSH deploy (forced-command)
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: dinkellabs
+          SERVICE: ${{ needs.build-and-push.outputs.deploy_service }}
+          TAG: ${{ needs.build-and-push.outputs.deploy_tag }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${DEPLOY_HOST:-}" ]]; then
+            echo "::error::DEPLOY_HOST repo variable not set"
+            exit 1
+          fi
+          if [[ -z "${DEPLOY_SSH_KEY:-}" ]]; then
+            echo "::error::DEPLOY_SSH_KEY repo secret not set"
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          # The server's authorized_keys forces /opt/voorvoeten/deploy.sh
+          # regardless of what we send. The args below land in the script's
+          # $SSH_ORIGINAL_COMMAND for validation + execution.
+          # UserKnownHostsFile=/dev/null because GHA runners are ephemeral;
+          # accept-new pins host key for this run only.
+          echo "::notice::deploying $SERVICE -> $TAG"
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=accept-new \
+              -o UserKnownHostsFile=/dev/null \
+              -o ConnectTimeout=10 \
+              -o ServerAliveInterval=30 \
+              "$DEPLOY_USER@$DEPLOY_HOST" \
+              "$SERVICE $TAG"

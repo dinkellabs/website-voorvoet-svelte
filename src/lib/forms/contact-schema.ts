@@ -16,7 +16,7 @@ export const contactSchema = z
       .regex(/^\d{10}$/, 'phone_invalid')
       .or(z.literal('')),
     description: z.string().min(1, 'description_required').max(2000, 'description_too_long'),
-    turnstileToken: z.string().min(1, 'turnstile_required'),
+    capToken: z.string().min(1, 'cap_required'),
   })
   .superRefine((data, ctx) => {
     if (data.request_type === 'Bel mij terug' && !data.phone) {

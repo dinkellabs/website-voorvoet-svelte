@@ -23,10 +23,10 @@ const SKIP_TRACKING_PREFIXES = ['/health', '/sitemap.xml', '/robots.txt', '/csp-
 // ─── Boot-time guards ────────────────────────────────────────────────────────
 
 if (!dev && !building) {
-  const turnstileEnabled = (env.TURNSTILE_ENABLED ?? 'false').toLowerCase() === 'true';
-  if (!turnstileEnabled) {
+  const capEnabled = (env.CAP_ENABLED ?? 'false').toLowerCase() === 'true';
+  if (!capEnabled) {
     logger.warn(
-      'TURNSTILE_ENABLED is not "true" in production — forms are unprotected against bots.',
+      'CAP_ENABLED is not "true" in production — forms are unprotected against bots.',
     );
   }
 }

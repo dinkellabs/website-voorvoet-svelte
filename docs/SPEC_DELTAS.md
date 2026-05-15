@@ -68,9 +68,10 @@ form POSTs JSON to `POST /api/orders/insoles`. Response codes are 204/400/422/50
 corresponding `+page.server.ts` files. The HTML form submits as
 `application/x-www-form-urlencoded`; the action returns a typed `ActionResult`.
 
-**Unchanged**: All field names, validation rules, turnstile integration, and
-email behaviour from §6 still apply exactly. The request/response *shape* is
-preserved; only the transport layer changes (form actions vs. JSON REST).
+**Unchanged**: All field names, validation rules, and email behaviour from §6
+still apply exactly. The request/response *shape* is preserved; only the
+transport layer changes (form actions vs. JSON REST). Bot protection has
+changed and is documented in its own delta below.
 
 `GET /health` is not needed and is omitted.
 
@@ -95,10 +96,15 @@ SvelteKit. `PUBLIC_API_URL` is unused and not defined.
 `$env/static/public`, so variable *names* are kept identical. `PUBLIC_API_URL`
 is the one exception — it is removed (see §6 delta above).
 
-Backend-only vars (`SMTP_*`, `TURNSTILE_SECRET_KEY`, `REIMBURSEMENTS_DATA_FILE`,
+Backend-only vars (`SMTP_*`, `CAP_SECRET`, `REIMBURSEMENTS_DATA_FILE`,
 `PRICING_DATA_FILE`, `BLOG_SHOW_*`) are accessed via `$env/static/private` or
 `$env/dynamic/private` in `+page.server.ts` / `+server.ts` — same semantics,
 no Python process required.
+
+The Turnstile env vars from §9 (`TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`,
+`TURNSTILE_ENABLED`, `TURNSTILE_DUMMY_MODE`, `PUBLIC_TURNSTILE_SITE_KEY`) no
+longer exist — they have been replaced by `CAP_*` equivalents (see §2 bot
+protection delta below).
 
 ---
 
@@ -112,6 +118,67 @@ summary, author, date, thumbnail, thumbnail_alt, tags, category) is unchanged.
 The file layout (`src/content/blog/{lang}/{NNN}_{slug}.md`) is unchanged.
 The custom `!button[Label](url)` syntax is implemented as an mdsvex remark
 plugin instead of an Astro remark plugin.
+
+---
+
+## §2 / §6 — Bot protection: Cap (capjs-core) instead of Cloudflare Turnstile
+
+**REQUIREMENTS says**: Bot protection on the contact and order forms uses
+**Cloudflare Turnstile**. The frontend renders the Turnstile widget; the
+backend verifies the submitted token against
+`https://challenges.cloudflare.com/turnstile/v0/siteverify`.
+
+**SvelteKit does**: Bot protection uses **[Cap](https://capjs.js.org)** — a
+self-hosted proof-of-work CAPTCHA — with `capjs-core` embedded in-process
+inside the SvelteKit Node app. No Cloudflare account, no third-party
+egress, no separate sidecar container. Tradeoffs:
+
+- The browser does a few seconds of WASM-backed proof-of-work instead of
+  Cloudflare's invisible challenge.
+- The Cap store (challenge nonces + redeem tokens) is in-memory; see
+  [RUNBOOK.md](RUNBOOK.md#cap-store-is-in-memory-and-single-replica) for
+  the single-replica constraint and the migration path to Redis/Valkey or
+  Cap Standalone if/when we scale out.
+- The WASM module (`@cap.js/wasm`) is self-hosted at
+  `static/cap_wasm_bg.wasm` and loaded via `window.CAP_CUSTOM_WASM_URL`
+  (`src/lib/cap-widget-loader.ts`), so the page makes zero requests to
+  `cdn.jsdelivr.net`.
+
+**Env var rename** (`TURNSTILE_*` → `CAP_*`):
+
+| Old (Turnstile) | New (Cap) |
+|---|---|
+| `TURNSTILE_ENABLED` | `CAP_ENABLED` |
+| `TURNSTILE_SECRET_KEY` | `CAP_SECRET` (≥16 bytes; HMAC key) |
+| `PUBLIC_TURNSTILE_SITE_KEY` | `PUBLIC_CAP_API_ENDPOINT` (default `/api/cap/`) |
+| `TURNSTILE_DUMMY_MODE` | `CAP_DUMMY_MODE` (E2E bypass, value `always_pass`) |
+
+The boot-time production guards are preserved exactly: the app refuses to
+start in production unless `CAP_ENABLED=true`, `CAP_SECRET` is ≥16 bytes,
+and `PUBLIC_CAP_API_ENDPOINT` is set. `CAP_DUMMY_MODE=always_pass` is the
+E2E escape valve used by Playwright.
+
+**Form field rename**: `turnstileToken` → `capToken`. **Failure code rename**:
+`turnstile_failed` → `cap_failed`. **i18n key rename**:
+`form_turnstile_label` / `validation_turnstile_required` /
+`toast_turnstile_error` → `form_cap_label` / `validation_cap_required` /
+`toast_cap_error`.
+
+**CSP additions** required by the cap-widget:
+
+- `script-src 'self' 'wasm-unsafe-eval'` — `WebAssembly.compile()` for the
+  PoW module
+- `worker-src 'self' blob:` — the widget spawns blob: Web Workers to
+  parallelise PoW across CPU cores
+
+**New endpoints** exposed on the SvelteKit app (only when
+`CAP_ENABLED=true`; 404 otherwise): `POST /api/cap/challenge` and
+`POST /api/cap/redeem`.
+
+**End-to-end smoke test**: `node scripts/test-cap-live.mjs` boots an
+isolated server with Cap enabled, runs the real PoW solve in headless
+Chromium, submits the form, and asserts both delivery and token-replay
+rejection.
 
 ---
 

@@ -36,8 +36,8 @@ local runs.
 | Variable                       | Value used in tests     | Purpose                                                              |
 | ------------------------------ | ----------------------- | -------------------------------------------------------------------- |
 | `PORT`                         | `3000`                  | Node adapter listen port                                             |
-| `TURNSTILE_ENABLED`            | `false`                 | Disables Cloudflare Turnstile check server-side (auto-pass)          |
-| `TURNSTILE_DUMMY_MODE`         | `always_pass`           | Turnstile widget renders in bypass mode                              |
+| `CAP_ENABLED`                  | `false`                 | Disables Cap (proof-of-work CAPTCHA) check server-side (auto-pass)   |
+| `CAP_DUMMY_MODE`               | `always_pass`           | Cap server-side verification bypass for E2E                          |
 | `SMTP_HOST`                    | `127.0.0.1`             | Points nodemailer at the in-process SMTP catcher                     |
 | `SMTP_PORT`                    | `2525`                  | SMTP catcher port (started in `global-setup.ts`)                     |
 | `SMTP_USERNAME`                | `test`                  | Accepted by the SMTP mock unconditionally                            |
