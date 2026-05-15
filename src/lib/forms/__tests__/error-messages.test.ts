@@ -5,7 +5,7 @@ vi.mock('$lib/paraglide/messages.js', () => ({
   validation_phone_invalid: () => 'phone_invalid_msg',
   validation_phone_required_for_callback: () => 'phone_required_msg',
   validation_birth_date_invalid: () => 'birth_date_invalid_msg',
-  validation_turnstile_required: () => 'turnstile_required_msg',
+  validation_cap_required: () => 'cap_required_msg',
   validation_quantity_invalid: () => 'quantity_invalid_msg',
   validation_required: () => 'required_msg',
   validation_max_length: ({ max }: { max: string }) => `max_length_msg(${max})`,
@@ -24,7 +24,7 @@ describe('translateFormError', () => {
     ['phone_invalid', 'phone_invalid_msg'],
     ['phone_required_for_callback', 'phone_required_msg'],
     ['birth_date_invalid', 'birth_date_invalid_msg'],
-    ['turnstile_required', 'turnstile_required_msg'],
+    ['cap_required', 'cap_required_msg'],
     ['quantity_invalid', 'quantity_invalid_msg'],
   ])('maps %s', (code, expected) => {
     expect(translateFormError(code)).toBe(expected);

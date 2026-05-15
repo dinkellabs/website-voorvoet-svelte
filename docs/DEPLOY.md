@@ -12,7 +12,13 @@ The VoorVoet SvelteKit site ships as a Docker image published to GitHub Containe
 The app container is responsible for:
 - Serving the SvelteKit app on port 3000
 - Outbound SMTP to deliver form submissions
-- Outbound HTTPS to Cloudflare Turnstile and (optionally) Umami
+- Outbound HTTPS to (optionally) Umami
+
+Bot protection runs **fully in-process** via the embedded
+[capjs-core](https://capjs.js.org) proof-of-work CAPTCHA — no third-party
+egress, no separate sidecar container, no shared cache. See
+[docs/RUNBOOK.md](RUNBOOK.md#rotate-cap_secret) for the secret-rotation
+procedure.
 
 The upstream proxy is responsible for:
 - TLS termination (Let's Encrypt or otherwise)
@@ -56,9 +62,9 @@ Required variables:
 | `SMTP_PASSWORD` | SMTP auth password (keep secret) |
 | `SMTP_FROM_EMAIL` | Envelope sender address |
 | `SMTP_TO_EMAIL` | Recipient address for form submissions |
-| `TURNSTILE_ENABLED` | Set `true` in production |
-| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key |
-| `PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key (client-visible) |
+| `CAP_ENABLED` | Set `true` in production. The app refuses to start otherwise (boot guard) |
+| `CAP_SECRET` | HMAC key for Cap challenge JWTs. Must be ≥16 bytes — generate with `openssl rand -hex 32` |
+| `PUBLIC_CAP_API_ENDPOINT` | Path the widget POSTs to (typically `/api/cap/`); the widget appends `challenge` and `redeem` |
 | `SITE_URL` | Full URL, e.g. `https://voorvoet.nl` |
 | `PUBLIC_SITE_URL` | Same as `SITE_URL` |
 
@@ -91,7 +97,7 @@ Pick **one mode**, not both, or every pageview is counted twice.
 - `1` — one proxy in front (typical: your host's Nginx/Caddy/Traefik)
 - `2` — two proxies (e.g. Cloudflare → your host's proxy → app)
 
-**Do not** drop these env vars or the rate limiter, Turnstile `remoteip`, and Umami analytics all collapse to a single global bucket keyed on the proxy's IP.
+**Do not** drop these env vars or the rate limiter and Umami analytics collapse to a single global bucket keyed on the proxy's IP.
 
 Your upstream proxy must actually forward these headers. For Nginx:
 

@@ -49,7 +49,7 @@ describe('email service', () => {
         email: 'jan@example.nl',
         phone: '0612345678',
         description: 'Testbericht',
-        turnstileToken: 'token',
+        capToken: 'token',
       };
 
       await sendContactEmail(data);
@@ -68,7 +68,7 @@ describe('email service', () => {
         email: 'maria@example.nl',
         phone: '',
         description: 'Vraag over vergoeding',
-        turnstileToken: 'token',
+        capToken: 'token',
       };
 
       await sendContactEmail(data);
@@ -86,7 +86,7 @@ describe('email service', () => {
         email: 'jan@example.nl',
         phone: '0612345678',
         description: 'Test',
-        turnstileToken: 'tok',
+        capToken: 'tok',
       };
 
       await sendContactEmail(data);
@@ -104,7 +104,7 @@ describe('email service', () => {
         email: 'jan@example.nl',
         phone: '',
         description: 'Test',
-        turnstileToken: 'tok',
+        capToken: 'tok',
       };
 
       await sendContactEmail(data);
@@ -122,7 +122,7 @@ describe('email service', () => {
         email: 'bad@example.nl\r\nBcc: victim@example.nl',
         phone: '',
         description: 'Inject',
-        turnstileToken: 'tok',
+        capToken: 'tok',
       };
 
       // sanitizeHeader removes CR/LF/TAB; the result is then validated as a
@@ -140,7 +140,7 @@ describe('email service', () => {
         email: 'piet@example.nl',
         phone: '0698765432',
         description: 'Mijn voet doet pijn',
-        turnstileToken: 'tok',
+        capToken: 'tok',
       };
 
       await sendContactEmail(data);
@@ -165,7 +165,7 @@ describe('email service', () => {
         insole_type: 'Sportzolen',
         quantity: 2,
         notes: '',
-        turnstileToken: 'token',
+        capToken: 'token',
       };
 
       await sendOrderEmail(data);
@@ -186,7 +186,7 @@ describe('email service', () => {
         insole_type: 'Dagelijkse zolen',
         quantity: 1,
         notes: 'Geen opmerkingen',
-        turnstileToken: 'token',
+        capToken: 'token',
       };
 
       await sendOrderEmail(data);
@@ -206,7 +206,7 @@ describe('email service', () => {
         insole_type: 'Zolen voor werkschoenen',
         quantity: 3,
         notes: '',
-        turnstileToken: 'tok',
+        capToken: 'tok',
       };
 
       await sendOrderEmail(data);
@@ -229,7 +229,7 @@ describe('email service', () => {
         insole_type: 'Dagelijkse zolen',
         quantity: 1,
         notes: '',
-        turnstileToken: 'tok',
+        capToken: 'tok',
       };
 
       await sendOrderEmail(data);
@@ -251,7 +251,7 @@ describe('email service', () => {
         insole_type: 'Dagelijkse zolen',
         quantity: 1,
         notes: '',
-        turnstileToken: 'tok',
+        capToken: 'tok',
       };
 
       await expect(sendOrderEmail(data)).rejects.toThrow('SMTP refused');

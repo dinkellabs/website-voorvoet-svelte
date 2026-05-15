@@ -2,7 +2,7 @@
  * Order insoles form spec.
  *
  * Fills and submits the order form for all 3 insole types and quantities 1–3.
- * TURNSTILE_ENABLED=false so Turnstile is a hidden field with value "disabled".
+ * CAP_ENABLED=false so the Cap widget is replaced by a hidden capToken="disabled" field.
  */
 
 import { test, expect } from '@playwright/test';

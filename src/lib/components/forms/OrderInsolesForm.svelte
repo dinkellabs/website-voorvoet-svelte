@@ -1,14 +1,8 @@
-<!--
-  svelte-turnstile still uses Svelte 4 `createEventDispatcher` events, so the
-  `on:callback` listener below is intentional. Migrate to a `callback={...}`
-  prop once the package ships native Svelte 5 callbacks; until then svelte
-  emits a deprecation warning but the behaviour is correct.
--->
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { superForm } from 'sveltekit-superforms';
   import { zod4Client as zodClient } from 'sveltekit-superforms/adapters';
   import type { SuperValidated } from 'sveltekit-superforms';
-  import { Turnstile } from 'svelte-turnstile';
   import { env } from '$env/dynamic/public';
   import { orderSchema, INSOLE_TYPES } from '$lib/forms/order-schema.js';
   import type { OrderFormData } from '$lib/forms/order-schema.js';
@@ -30,8 +24,8 @@
         toast.show({ kind: 'success', message: m.toast_order_success() });
       } else if (result.type === 'failure') {
         const code = (result.data as FormFailureData | undefined)?.code;
-        if (code === 'turnstile_failed') {
-          toast.show({ kind: 'error', message: m.toast_turnstile_error() });
+        if (code === 'cap_failed') {
+          toast.show({ kind: 'error', message: m.toast_cap_error() });
         } else {
           toast.show({ kind: 'error', message: m.toast_order_error() });
         }
@@ -41,18 +35,31 @@
     },
   });
 
-  const siteKey = env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+  const apiEndpoint = env.PUBLIC_CAP_API_ENDPOINT ?? '';
 
-  // When Turnstile is not configured (no site key), the form ships a hidden
-  // `turnstileToken=disabled` field. Seed the client store to match so
-  // zodClient's `min(1)` validation doesn't silently block submission.
-  if (!siteKey && !$form.turnstileToken) {
-    $form.turnstileToken = 'disabled';
+  if (!apiEndpoint && !$form.capToken) {
+    $form.capToken = 'disabled';
   }
 
-  function handleTurnstileCallback(token: string) {
-    $form.turnstileToken = token;
-  }
+  let capWidget: HTMLElement | undefined = $state();
+
+  onMount(() => {
+    if (!capWidget) return;
+    void import('$lib/cap-widget-loader.js').then((m) => m.loadCapWidget());
+    const onSolve = (e: Event) => {
+      const detail = (e as CustomEvent<{ token: string }>).detail;
+      $form.capToken = detail.token;
+    };
+    const onReset = () => {
+      $form.capToken = '';
+    };
+    capWidget.addEventListener('solve', onSolve);
+    capWidget.addEventListener('reset', onReset);
+    return () => {
+      capWidget?.removeEventListener('solve', onSolve);
+      capWidget?.removeEventListener('reset', onReset);
+    };
+  });
 
   const insoleTypeLabels: Record<string, string> = {
     'Dagelijkse zolen': m.form_insole_type_daily(),
@@ -182,17 +189,17 @@
     {/if}
   </div>
 
-  {#if siteKey}
+  {#if apiEndpoint}
     <div class="form-group">
-      <p class="form-label">{m.form_turnstile_label()}</p>
-      <Turnstile {siteKey} on:callback={(e) => handleTurnstileCallback(e.detail.token)} />
-      <input type="hidden" name="turnstileToken" bind:value={$form.turnstileToken} />
-      {#if $errors.turnstileToken}
-        <p class="form-error">{translateFirstError($errors.turnstileToken)}</p>
+      <p class="form-label">{m.form_cap_label()}</p>
+      <cap-widget bind:this={capWidget} data-cap-api-endpoint={apiEndpoint}></cap-widget>
+      <input type="hidden" name="capToken" bind:value={$form.capToken} />
+      {#if $errors.capToken}
+        <p class="form-error">{translateFirstError($errors.capToken)}</p>
       {/if}
     </div>
   {:else}
-    <input type="hidden" name="turnstileToken" value="disabled" />
+    <input type="hidden" name="capToken" value="disabled" />
   {/if}
 
   <div class="form-submit-row">

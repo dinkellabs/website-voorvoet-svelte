@@ -36,11 +36,18 @@ const config = {
       mode: 'auto',
       directives: {
         'default-src': ['self'],
-        'script-src': ['self', 'https://challenges.cloudflare.com'],
+        // 'wasm-unsafe-eval' lets the cap-widget compile its proof-of-work
+        // module via WebAssembly.compile(); without it, the widget falls
+        // back to a much slower pure-JS solver.
+        'script-src': ['self', "'wasm-unsafe-eval'"],
+        // cap-widget spawns blob: Web Workers for parallel PoW solving.
+        // Falls back to script-src when worker-src is unset, which is too
+        // restrictive — declare it explicitly.
+        'worker-src': ['self', 'blob:'],
         'style-src': ['self', 'unsafe-inline'],
         'img-src': ['self', 'data:'],
-        'connect-src': ['self', 'https://challenges.cloudflare.com'],
-        'frame-src': ['https://challenges.cloudflare.com', 'https://www.google.com'],
+        'connect-src': ['self'],
+        'frame-src': ['https://www.google.com'],
         'font-src': ['self'],
         'object-src': ['none'],
         'base-uri': ['self'],

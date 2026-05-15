@@ -10,7 +10,7 @@ const validBase = {
   insole_type: 'Dagelijkse zolen' as const,
   quantity: 1,
   notes: '',
-  turnstileToken: 'token-abc',
+  capToken: 'token-abc',
 };
 
 describe('orderSchema', () => {
@@ -103,7 +103,7 @@ describe('orderSchema', () => {
     }
   });
 
-  it('rejects empty turnstileToken', () => {
-    expect(orderSchema.safeParse({ ...validBase, turnstileToken: '' }).success).toBe(false);
+  it('rejects empty capToken', () => {
+    expect(orderSchema.safeParse({ ...validBase, capToken: '' }).success).toBe(false);
   });
 });

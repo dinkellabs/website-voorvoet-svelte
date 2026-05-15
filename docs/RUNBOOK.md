@@ -2,27 +2,42 @@
 
 Operational procedures for common tasks. All commands assume you are on the Hetzner VPS in `/srv/voorvoet` unless otherwise noted.
 
-## Rotate Cloudflare Turnstile Keys
+## Rotate CAP_SECRET
 
-1. Log in to [dash.cloudflare.com](https://dash.cloudflare.com) → Turnstile → your site.
-2. Click **Rotate secret key** — the old key keeps working for ~12 hours.
-3. Copy the new **Secret key** and **Site key**.
-4. Update `.env` on the server:
+`CAP_SECRET` is the HMAC key the embedded Cap server uses to sign challenge
+JWTs and redeem-token fingerprints. There is no third-party dashboard — the
+secret is generated and consumed entirely on this host. Rotating it is fast
+but **invalidates every in-flight challenge** (any visitor who has loaded
+the form but not yet submitted will see one solve failure and a fresh
+widget on retry).
+
+1. Generate a new secret (≥16 bytes):
 
 ```fish
-# Edit the relevant lines
-TURNSTILE_SECRET_KEY=<new-secret-key>
-PUBLIC_TURNSTILE_SITE_KEY=<new-site-key>
+openssl rand -hex 32
 ```
 
-5. Redeploy the app (the upstream reverse proxy is unaffected):
+2. Update `.env` on the server:
+
+```fish
+# Edit the relevant line
+CAP_SECRET=<new-secret>
+```
+
+3. Redeploy the app (the upstream reverse proxy is unaffected):
 
 ```fish
 docker compose pull && docker compose up -d
 ```
 
-6. Verify the contact and order forms work end-to-end.
-7. After 24 hours, verify the old key is fully retired in the Cloudflare dashboard.
+4. Verify the contact and order forms work end-to-end — open
+   `https://voorvoet.nl/nl/contact`, solve the widget, submit, and confirm
+   the success toast plus delivered email.
+
+There is no second key / overlap window. If you need zero-downtime
+rotation, add a second app replica with the new secret behind your reverse
+proxy first, then drain the old one. This is rarely worth the complexity
+for a public marketing form.
 
 ## Change SMTP Provider
 
@@ -212,6 +227,26 @@ docker compose logs app | jq 'select(.msg | contains("email sent"))' | tail -5
 - **Scaling to `replicas: 2+` splits the limiter** — each replica enforces its own counters, so the effective limit doubles. Before scaling, swap in a Redis-backed `RateLimiterStore`.
 
 The limiter keys on `event.getClientAddress()`, which only returns the real client IP because `ADDRESS_HEADER`/`XFF_DEPTH` are wired in `docker-compose.yml` and your upstream proxy forwards `X-Forwarded-For`. Drop either side and the limiter collapses to one global bucket.
+
+### Cap store is in-memory and single-replica
+
+`src/lib/server/cap-store.ts` holds two TTL'd sets in a single Node `Map`:
+
+- **Challenge nonces** (~10 min TTL) prevent replaying a solved challenge to
+  `/api/cap/redeem` to mint duplicate redeem tokens.
+- **Redeem tokens** (~20 min TTL) are consumed by `verifyCapToken` on form
+  submit, so a token cannot be re-used after a successful POST.
+
+The same single-replica caveats as the rate limiter apply:
+
+- **Restarts wipe the store.** Visitors mid-solve when the container
+  recycles see a one-shot solve failure on submit; they retry and succeed.
+  Visitors who have already submitted are unaffected.
+- **Scaling to `replicas: 2+` splits the store** — a visitor solving on
+  replica A and submitting to replica B sees `cap_failed`. Before scaling,
+  move the store to Redis/Valkey (swap the body of `cap-store.ts` for a
+  Redis `SET NX EX` / `GETDEL` client) or switch the deployment to
+  [Cap Standalone](https://capjs.js.org/guide/standalone/).
 
 ### CSP report endpoint
 

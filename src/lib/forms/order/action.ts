@@ -3,7 +3,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { Action } from '@sveltejs/kit';
 import { orderSchema } from '$lib/forms/order-schema.js';
-import { verifyTurnstileToken } from '$lib/server/turnstile.js';
+import { verifyCapToken } from '$lib/server/cap.js';
 import { sendOrderEmail } from '$lib/server/email.js';
 import { trackEvent } from '$lib/server/umami.js';
 import { orderLimiter } from '$lib/server/rate-limiter.js';
@@ -33,14 +33,10 @@ export const orderAction: Action = async (event) => {
     return fail(400, { form });
   }
 
-  const turnstileOk = await verifyTurnstileToken(
-    form.data.turnstileToken,
-    event.getClientAddress(),
-    requestId,
-  );
-  if (!turnstileOk) {
-    log.warn({ path: event.url.pathname }, 'order form turnstile failed');
-    return fail(400, { form, code: 'turnstile_failed' satisfies FormFailureCode });
+  const capOk = await verifyCapToken(form.data.capToken, requestId);
+  if (!capOk) {
+    log.warn({ path: event.url.pathname }, 'order form cap failed');
+    return fail(400, { form, code: 'cap_failed' satisfies FormFailureCode });
   }
 
   try {

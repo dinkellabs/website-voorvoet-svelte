@@ -7,7 +7,7 @@ const logger = pino({
     paths: [
       '*.password',
       '*.SMTP_PASSWORD',
-      '*.TURNSTILE_SECRET_KEY',
+      '*.CAP_SECRET',
       '*.auth.pass',
       '*.headers.authorization',
       '*.headers.cookie',
