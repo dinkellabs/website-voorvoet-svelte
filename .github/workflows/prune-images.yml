@@ -3,17 +3,19 @@ name: Prune old container versions
 # What this does
 # ───────────────
 # Every Sunday at 03:00 UTC (and on manual dispatch):
-#   • Keeps the newest 10 `dev-<sha>` immutable images.
-#   • Deletes all untagged (orphaned) versions — these accumulate every
-#     time the rolling `:dev` tag is overwritten.
-#   • NEVER touches versions tagged `latest`, `dev` (the rolling tag),
-#     or a semver release (e.g. `0.1.2`).
+#   • Keeps the newest N `dev-<sha>` immutable images (N = `keep` input, default 10).
+#   • Deletes untagged (orphan) versions older than the `untagged-grace-days`
+#     window (default 7). These accumulate every time the rolling `:dev` (or
+#     `:latest`) tag is overwritten.
+#   • NEVER touches versions tagged `latest`, `dev` (the rolling tag), or a
+#     semver release (e.g. `0.1.2`), nor tags ending in `.sig`/`.att`/`.sbom`
+#     (Sigstore attestations).
 #
-# Safety
-# ──────
-# The first time you enable this, run it manually from the Actions tab
-# with `dry-run: true` to see what would be deleted. Once happy with the
-# output, schedule takes over.
+# Safety: the grace window protects in-flight publishes whose sub-manifests
+# briefly appear untagged before the parent index commits.
+#
+# First time, dispatch this manually from the Actions tab with
+# `dry-run: true` to preview the deletion list.
 
 on:
   schedule:
@@ -24,6 +26,10 @@ on:
         description: How many newest dev-<sha> versions to keep
         type: string
         default: '10'
+      untagged-grace-days:
+        description: Skip untagged versions newer than this many days
+        type: string
+        default: '7'
       dry-run:
         description: Preview deletions without removing anything
         type: boolean
@@ -39,54 +45,128 @@ jobs:
   prune:
     runs-on: ubuntu-latest
     steps:
-      - name: Prune
+      - name: Plan + execute
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           KEEP: ${{ inputs.keep || '10' }}
+          GRACE_DAYS: ${{ inputs.untagged-grace-days || '7' }}
           DRY_RUN: ${{ inputs.dry-run || 'false' }}
         run: |
           set -euo pipefail
           owner="${{ github.repository_owner }}"
 
-          versions=$(gh api --paginate \
-            "/users/$owner/packages/container/$PACKAGE/versions")
-          echo "Total versions in registry: $(echo "$versions" | jq 'length')"
+          echo "── Configuration ──────────────────────────────────────────────"
+          echo "  package:     ${PACKAGE}"
+          echo "  owner:       ${owner}"
+          echo "  keep:        ${KEEP} newest dev-<sha> versions"
+          echo "  grace:       ${GRACE_DAYS} day(s) for untagged versions"
+          echo "  dry-run:     ${DRY_RUN}"
+          echo ""
 
-          # Versions to delete:
-          #   1) Untagged (orphaned) — every one of them.
-          #   2) Versions whose tags are all `dev-<7hex>` — keep newest $KEEP, delete the rest.
-          # Versions tagged `latest`, `dev` (rolling), or a semver are excluded.
-          to_delete=$(echo "$versions" | jq -r --argjson keep "$KEEP" '
-            (
-              [.[] | select(.metadata.container.tags | length == 0)]
-              +
-              ([.[] |
-                select(
-                  (.metadata.container.tags | length) > 0
-                  and (.metadata.container.tags | all(test("^dev-[0-9a-f]{7}$")))
-                )
-              ] | sort_by(.created_at) | reverse | .[$keep:])
+          versions=$(gh api --paginate \
+            "/users/${owner}/packages/container/${PACKAGE}/versions")
+          total=$(echo "$versions" | jq 'length')
+          echo "Found ${total} version(s) in GHCR."
+          echo ""
+
+          # Classify each version into exactly one bucket:
+          #   keep-protected — tagged latest, dev, semver, or *.sig/.att/.sbom
+          #   keep-dev       — among the newest $KEEP dev-<sha> versions
+          #   delete-dev     — older dev-<sha> beyond the keep window
+          #   keep-untagged  — untagged but inside the grace window
+          #   delete-untagged— untagged and older than the grace window
+          #   keep-other     — tagged with something we don't recognise (defensive default: keep)
+          classified=$(echo "$versions" | jq --argjson keep "$KEEP" --argjson graceDays "$GRACE_DAYS" '
+            def protected_tag(t):
+              t == "latest"
+              or t == "dev"
+              or (t | test("^\\d+\\.\\d+\\.\\d+$"))
+              or (t | test("\\.(sig|att|sbom)$"));
+            def is_dev_sha(t): t | test("^dev-[0-9a-f]{7}$");
+            def graceCutoff: (now - ($graceDays * 86400));
+
+            # First pass: bucket every version, dev-<sha> ones still unranked.
+            map(
+              .tags    = (.metadata.container.tags // []) |
+              .digest  = (.name // "") |
+              if (.tags | length) == 0 then
+                if (.created_at | fromdateiso8601) < graceCutoff
+                  then . + {bucket: "delete-untagged"}
+                  else . + {bucket: "keep-untagged"}
+                end
+              elif (.tags | any(protected_tag(.))) then
+                . + {bucket: "keep-protected"}
+              elif (.tags | all(is_dev_sha(.))) then
+                . + {bucket: "candidate-dev"}
+              else
+                . + {bucket: "keep-other"}
+              end
             )
-            | .[] | .id
+            # Second pass: keep newest $keep of candidate-dev, delete the rest.
+            | (map(select(.bucket == "candidate-dev")) | sort_by(.created_at) | reverse) as $devs
+            | (
+                ($devs | .[:$keep] | map(.bucket = "keep-dev"))
+                + ($devs | .[$keep:] | map(.bucket = "delete-dev"))
+                + map(select(.bucket != "candidate-dev"))
+              )
           ')
 
+          # Helper: ISO timestamp → "Nd ago" / "Nh ago".
+          render_age () {
+            local iso="$1"
+            python3 -c "
+          import datetime, sys
+          t = datetime.datetime.fromisoformat(sys.argv[1].replace('Z','+00:00'))
+          d = datetime.datetime.now(datetime.timezone.utc) - t
+          h = d.total_seconds() / 3600
+          if h < 24:
+              print(f'{int(h)}h ago')
+          else:
+              print(f'{int(h/24)}d ago')
+          " "$iso"
+          }
+
+          echo "── Plan ───────────────────────────────────────────────────────"
+          printf "  %-7s  %-9s  %-12s  %s\n" "ACTION" "ID" "AGE" "TAGS / DIGEST"
+          echo "$classified" | jq -r '
+            sort_by(.created_at) | reverse | .[] |
+            [(.bucket), (.id|tostring), .created_at, (if (.tags|length)>0 then (.tags|join(",")) else .digest end)] | @tsv
+          ' | while IFS=$'\t' read -r bucket id created label; do
+            age=$(render_age "$created")
+            case "$bucket" in
+              delete-*)  marker="DELETE" ;;
+              keep-*)    marker="keep"   ;;
+            esac
+            printf "  %-7s  %-9s  %-12s  %s\n" "$marker" "$id" "$age" "$label"
+          done
+
+          echo ""
+          echo "── Summary ────────────────────────────────────────────────────"
+          echo "$classified" | jq -r '
+            group_by(.bucket) | map({bucket: .[0].bucket, count: length})
+            | .[] | "  \(.count|tostring|.[:3] + (if length > 3 then "" else "  "[length:] end))  \(.bucket)"
+          '
+
+          to_delete=$(echo "$classified" | jq -r '.[] | select(.bucket | startswith("delete-")) | .id')
           if [ -z "$to_delete" ]; then
-            echo "Nothing to prune."
+            echo ""
+            echo "Nothing to delete."
             exit 0
           fi
 
-          count=$(echo "$to_delete" | wc -l | tr -d ' ')
-          echo "Pruning $count versions (keep newest $KEEP dev-<sha>, drop all untagged)."
+          echo ""
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Dry-run complete. Re-run with dry-run: false to actually delete."
+            exit 0
+          fi
 
+          echo "── Executing ──────────────────────────────────────────────────"
           for id in $to_delete; do
-            tags=$(echo "$versions" | jq -r --argjson id "$id" \
-              '.[] | select(.id == $id) | .metadata.container.tags | join(",")')
-            label="${tags:-<untagged>}"
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "[dry-run] would delete version $id ($label)"
-            else
-              echo "deleting version $id ($label)"
-              gh api --method DELETE \
-                "/users/$owner/packages/container/$PACKAGE/versions/$id"
-            fi
+            label=$(echo "$classified" | jq -r --argjson id "$id" '
+              .[] | select(.id == $id) |
+              (if (.tags | length) > 0 then (.tags | join(",")) else .digest end)
+            ')
+            echo "  deleting ${id} (${label})"
+            gh api --method DELETE \
+              "/users/${owner}/packages/container/${PACKAGE}/versions/${id}"
           done
