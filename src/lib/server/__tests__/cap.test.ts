@@ -32,6 +32,9 @@ describe('verifyCapToken', () => {
 
   it('auto-passes when CAP_ENABLED is false', async () => {
     vi.doMock('$env/dynamic/private', () => ({ env: { CAP_ENABLED: 'false' } }));
+    vi.doMock('$env/dynamic/public', () => ({
+      env: { PUBLIC_SITE_URL: 'https://dev.voorvoeten.nl' },
+    }));
 
     const { verifyCapToken } = await import('../cap.js');
     expect(await verifyCapToken('any-token')).toBe(true);
@@ -39,6 +42,9 @@ describe('verifyCapToken', () => {
 
   it('auto-passes when CAP_ENABLED is unset', async () => {
     vi.doMock('$env/dynamic/private', () => ({ env: {} }));
+    vi.doMock('$env/dynamic/public', () => ({
+      env: { PUBLIC_SITE_URL: 'https://dev.voorvoeten.nl' },
+    }));
 
     const { verifyCapToken } = await import('../cap.js');
     expect(await verifyCapToken('any-token')).toBe(true);
@@ -120,41 +126,57 @@ describe('verifyCapToken', () => {
   });
 
   it('boot-time: refuses to start in production when CAP_ENABLED is not "true"', async () => {
-    vi.doMock('$app/environment', () => ({ dev: false, building: false }));
     vi.doMock('$env/dynamic/private', () => ({
       env: { CAP_ENABLED: 'false', CAP_SECRET: 'x'.repeat(32) },
     }));
-    vi.doMock('$env/dynamic/public', () => ({ env: { PUBLIC_CAP_API_ENDPOINT: '/api/cap/' } }));
+    vi.doMock('$env/dynamic/public', () => ({
+      env: { PUBLIC_CAP_API_ENDPOINT: '/api/cap/', PUBLIC_SITE_URL: 'https://voorvoeten.nl' },
+    }));
 
     await expect(import('../cap.js')).rejects.toThrow(/CAP_ENABLED must be exactly/);
   });
 
   it('boot-time: refuses to start in production when CAP_SECRET is shorter than 16 bytes', async () => {
-    vi.doMock('$app/environment', () => ({ dev: false, building: false }));
     vi.doMock('$env/dynamic/private', () => ({
       env: { CAP_ENABLED: 'true', CAP_SECRET: 'short' },
     }));
-    vi.doMock('$env/dynamic/public', () => ({ env: { PUBLIC_CAP_API_ENDPOINT: '/api/cap/' } }));
+    vi.doMock('$env/dynamic/public', () => ({
+      env: { PUBLIC_CAP_API_ENDPOINT: '/api/cap/', PUBLIC_SITE_URL: 'https://voorvoeten.nl' },
+    }));
 
     await expect(import('../cap.js')).rejects.toThrow(/CAP_SECRET must be set/);
   });
 
   it('boot-time: refuses to start in production without PUBLIC_CAP_API_ENDPOINT', async () => {
-    vi.doMock('$app/environment', () => ({ dev: false, building: false }));
     vi.doMock('$env/dynamic/private', () => ({
       env: { CAP_ENABLED: 'true', CAP_SECRET: 'x'.repeat(32) },
     }));
-    vi.doMock('$env/dynamic/public', () => ({ env: {} }));
+    vi.doMock('$env/dynamic/public', () => ({
+      env: { PUBLIC_SITE_URL: 'https://voorvoeten.nl' },
+    }));
 
     await expect(import('../cap.js')).rejects.toThrow(/PUBLIC_CAP_API_ENDPOINT must be set/);
   });
 
   it('boot-time: dummy mode skips all production guards', async () => {
-    vi.doMock('$app/environment', () => ({ dev: false, building: false }));
     vi.doMock('$env/dynamic/private', () => ({
       env: { CAP_ENABLED: 'false', CAP_DUMMY_MODE: 'always_pass' },
     }));
-    vi.doMock('$env/dynamic/public', () => ({ env: {} }));
+    vi.doMock('$env/dynamic/public', () => ({
+      env: { PUBLIC_SITE_URL: 'https://voorvoeten.nl' },
+    }));
+
+    const mod = await import('../cap.js');
+    expect(await mod.verifyCapToken('any')).toBe(true);
+  });
+
+  it('boot-time: dev hostname does not trigger guard even when CAP_ENABLED is false', async () => {
+    vi.doMock('$env/dynamic/private', () => ({
+      env: { CAP_ENABLED: 'false' },
+    }));
+    vi.doMock('$env/dynamic/public', () => ({
+      env: { PUBLIC_SITE_URL: 'https://dev.voorvoeten.nl' },
+    }));
 
     const mod = await import('../cap.js');
     expect(await mod.verifyCapToken('any')).toBe(true);

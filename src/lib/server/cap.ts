@@ -1,24 +1,38 @@
 import { createHash } from 'node:crypto';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
-import { building, dev } from '$app/environment';
+import { building } from '$app/environment';
 import { withRequestId } from '$lib/server/logger.js';
 import { consumeToken } from '$lib/server/cap-store.js';
 
-// `building` is true during `vite build`'s analyse pass; env vars aren't
-// loaded then. Skip the production guard so the build doesn't trip.
-const isProduction = !dev && !building;
+// The gate uses the runtime PUBLIC_SITE_URL hostname rather than the `dev`
+// flag from `$app/environment`, because `dev` is a compile-time constant —
+// the same production bundle runs on both dev.voorvoeten.nl and voorvoeten.nl,
+// so a build-time check can't tell them apart. Skipped during `building`
+// (vite analyse pass: env not loaded). Fail-closed if PUBLIC_SITE_URL is
+// missing or unparseable so a misconfigured prod still trips the guard.
+function isRealProductionHost(): boolean {
+  if (building) return false;
+  const siteUrl = pubEnv.PUBLIC_SITE_URL;
+  if (!siteUrl) return true;
+  try {
+    return new URL(siteUrl).hostname === 'voorvoeten.nl';
+  } catch {
+    return true;
+  }
+}
 
-// E2E escape valve: playwright runs `node build/index.js` (isProduction=true)
-// but with bot protection disabled. Setting CAP_DUMMY_MODE=always_pass
-// bypasses the production guards. NEVER set this in real production.
+// E2E escape valve: playwright runs `node build/index.js` against a real
+// prod-like host but with bot protection disabled. Setting
+// CAP_DUMMY_MODE=always_pass bypasses the production guards. NEVER set this
+// in real production.
 const dummyMode = env.CAP_DUMMY_MODE === 'always_pass';
 const capEnabled = (env.CAP_ENABLED ?? 'false').toLowerCase() === 'true';
 
 const rawSecret = env.CAP_SECRET ?? '';
 const publicEndpoint = pubEnv.PUBLIC_CAP_API_ENDPOINT ?? '';
 
-if (isProduction && !dummyMode) {
+if (isRealProductionHost() && !dummyMode) {
   if (!capEnabled) {
     throw new Error(
       'CAP_ENABLED must be exactly "true" in production. Refusing to start with bot protection disabled.',

@@ -5,7 +5,7 @@ vi.mock('$env/dynamic/private', () => ({
 }));
 
 vi.mock('$env/dynamic/public', () => ({
-  env: {},
+  env: { PUBLIC_SITE_URL: 'https://dev.voorvoeten.nl' },
 }));
 
 vi.mock('$app/environment', () => ({
