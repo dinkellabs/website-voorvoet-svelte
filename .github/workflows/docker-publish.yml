@@ -35,9 +35,11 @@ on:
       - 'eslint.config.js'
       - 'playwright.config.ts'
       - 'playwright-isolate.config.ts'
-      - '.github/workflows/ci.yml'
-      - '.github/workflows/docker.yml'
-      - '.github/workflows/prune-images.yml'
+      # Including this workflow itself in the ignore list means edits to
+      # workflow files never auto-publish (which would always fail at the
+      # VERSION-exists guard until you bump VERSION). Use `workflow_dispatch`
+      # to verify workflow changes.
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
