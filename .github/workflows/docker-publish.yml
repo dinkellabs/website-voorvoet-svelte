@@ -37,6 +37,7 @@ on:
       - 'playwright-isolate.config.ts'
       - '.github/workflows/ci.yml'
       - '.github/workflows/docker.yml'
+      - '.github/workflows/prune-images.yml'
   workflow_dispatch:
 
 permissions:
