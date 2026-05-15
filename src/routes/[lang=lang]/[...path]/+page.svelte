@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types.js';
   import type { Lang, PageKey } from '$lib/i18n/route-map.js';
-  import type { PricingRow } from '$lib/data/reimbursements.js';
+  import type { ReimbursementRow, PricingRow } from '$lib/data/reimbursements-types.js';
   import type { LegalDocument } from '$lib/legal/loader.js';
   import InformationPage from '$lib/pages/information/Page.svelte';
   import ReimbursementsPage from '$lib/pages/reimbursements/Page.svelte';
@@ -12,6 +12,7 @@
   type CatchAllData = PageData & {
     pageKey: PageKey;
     lang: Lang;
+    reimbursements?: ReimbursementRow[];
     pricing?: PricingRow[];
     legalDoc?: LegalDocument | null;
   };
@@ -26,7 +27,9 @@
 {#if data.pageKey === 'information'}
   <InformationPage {data} />
 {:else if data.pageKey === 'reimbursements'}
-  <ReimbursementsPage data={{ ...data, pricing: data.pricing ?? [] }} />
+  <ReimbursementsPage
+    data={{ ...data, reimbursements: data.reimbursements ?? [], pricing: data.pricing ?? [] }}
+  />
 {:else if data.pageKey === 'credits'}
   <CreditsPage {data} />
 {:else if data.pageKey === 'privacy_policy'}

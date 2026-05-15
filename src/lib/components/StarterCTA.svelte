@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Lang } from '$lib/i18n/route-map.js';
   import { routeFor } from '$lib/i18n/route-map.js';
+  import { page } from '$app/state';
   import * as m from '$lib/paraglide/messages.js';
 
   interface Props {
@@ -9,7 +10,7 @@
 
   let { lang }: Props = $props();
 
-  const href = $derived(routeFor('contact', lang));
+  const href = $derived(page.data.planPortalUrl || routeFor('contact', lang));
 </script>
 
 <a {href} class="starter-cta">

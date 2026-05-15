@@ -6,19 +6,18 @@
   import Title from '$lib/components/Title.svelte';
   import Chevron from '$lib/components/icons/Chevron.svelte';
   import * as m from '$lib/paraglide/messages.js';
-  import {
-    getReimbursements,
-    type ReimbursementRow,
-    type PricingRow,
-  } from '$lib/data/reimbursements.js';
+  import type {
+    ReimbursementRow,
+    PricingRow,
+  } from '$lib/data/reimbursements-types.js';
 
   interface Props {
-    data: { lang: Lang; pricing: PricingRow[] };
+    data: { lang: Lang; reimbursements: ReimbursementRow[]; pricing: PricingRow[] };
   }
 
   let { data }: Props = $props();
 
-  const rows = $derived(getReimbursements());
+  const rows = $derived(data.reimbursements ?? []);
   const pricing = $derived(data.pricing ?? []);
 
   type SortColumn = 'verzekeraar' | 'pakket' | 'vergoeding';

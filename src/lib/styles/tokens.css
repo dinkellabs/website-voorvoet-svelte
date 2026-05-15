@@ -15,10 +15,10 @@
   --color-primary-500: #05847c;
   --color-primary-700: #005152;
 
-  /* --color-btn-primary: white-text button bg that meets WCAG AA 3:1 large-text.
-     #05847c (#primary-500) gives 4.53:1 with white — passes both large and normal text. */
-  --color-btn-primary: #05847c;
-  --color-btn-primary-hover: #005152;
+  /* Button bg matches the home hero "Voetklachten?" title colour (primary-300),
+     hover steps one shade darker (primary-500). */
+  --color-btn-primary: #05a8a2;
+  --color-btn-primary-hover: #05847c;
 
   /* ----------------------------------------------------------
      Colors — Backgrounds
