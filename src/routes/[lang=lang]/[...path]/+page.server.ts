@@ -5,7 +5,7 @@ import { langFromParams, pageKeyForPath } from '$lib/i18n/route-map.js';
 import { buildMeta } from '$lib/server/seo/meta.js';
 import { buildAlternates } from '$lib/server/seo/alternates.js';
 import { loadLegal } from '$lib/legal/loader.js';
-import { getPricing } from '$lib/data/reimbursements.js';
+import { getPricing, getReimbursements } from '$lib/data/reimbursements.server.js';
 
 const FORM_KEYS: PageKey[] = ['contact', 'order_insoles'];
 const SKIP_KEYS: PageKey[] = [...FORM_KEYS, 'blog', 'home'];
@@ -31,8 +31,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
   const base = { pageKey, lang, meta, alternates };
 
   if (pageKey === 'reimbursements') {
+    const reimbursements = getReimbursements();
     const pricing = getPricing();
-    return { ...base, pricing };
+    return { ...base, reimbursements, pricing };
   }
 
   if (pageKey === 'privacy_policy') {

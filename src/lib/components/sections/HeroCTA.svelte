@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Lang } from '$lib/i18n/route-map.js';
   import { routeFor } from '$lib/i18n/route-map.js';
+  import { page } from '$app/state';
   import * as m from '$lib/paraglide/messages.js';
   import CheckSquareO from '$lib/components/icons/CheckSquareO.svelte';
 
@@ -12,7 +13,7 @@
 
   let { lang, title, items }: Props = $props();
 
-  const href = $derived(routeFor('contact', lang));
+  const href = $derived(page.data.planPortalUrl || routeFor('contact', lang));
 </script>
 
 <div
@@ -135,17 +136,11 @@
     white-space: nowrap;
     transition:
       background-color 0.2s ease,
-      box-shadow 0.2s ease,
-      transform 0.1s ease;
+      box-shadow 0.2s ease;
   }
 
   .hero-cta__btn:hover {
     background-color: var(--color-btn-primary-hover);
     box-shadow: 0 6px 16px rgba(5, 168, 162, 0.4);
-    transform: translateY(-1px);
-  }
-
-  .hero-cta__btn:active {
-    transform: translateY(0);
   }
 </style>
