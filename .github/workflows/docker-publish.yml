@@ -147,13 +147,55 @@ jobs:
     # Triggers the server to pull + restart only the affected service. The
     # forced-command SSH key on the server makes the only thing this job
     # can do `/opt/voorvoeten/deploy.sh <service> <tag>` — see
-    # dinkellabs-infra/infra/cloud-init/bootstrap.yaml.tftpl. Skipped on
-    # workflow_dispatch unless explicitly opted in (see if: below).
+    # dinkellabs-infra/pyinfra/files/voorvoeten/deploy.sh. The runner
+    # reaches the server over NetBird (the Hetzner Cloud Firewall locks
+    # public 22 to the operator's home IP). Skipped on workflow_dispatch
+    # unless explicitly opted in (see if: below).
     needs: build-and-push
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Join NetBird mesh
+        env:
+          NETBIRD_SETUP_KEY: ${{ secrets.NETBIRD_SETUP_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${NETBIRD_SETUP_KEY:-}" ]]; then
+            echo "::error::NETBIRD_SETUP_KEY repo secret not set"
+            exit 1
+          fi
+
+          # NetBird's official install script (CLI-only on GHA — no UI).
+          # The runner has passwordless sudo by default.
+          curl -fsSL https://pkgs.netbird.io/install.sh | sudo sh
+
+          # Register as an ephemeral peer. The setup key must be created
+          # in the NetBird UI with `Ephemeral peers` enabled so this peer
+          # auto-prunes 10 min after the job ends — otherwise each run
+          # would leak a peer entry. Hostname embeds the run id for
+          # traceability in the NetBird console.
+          sudo netbird up \
+              --setup-key "$NETBIRD_SETUP_KEY" \
+              --hostname "gha-voorvoeten-${GITHUB_RUN_ID}"
+
+          # Smoke check: resolve and ping the server peer over the mesh
+          # before handing off to ssh. Saves an opaque ssh timeout if
+          # NetBird is misconfigured.
+          for i in $(seq 1 12); do
+            if ping -c1 -W2 dinkellabs >/dev/null 2>&1; then
+              echo "::notice::NetBird up; 'dinkellabs' reachable"
+              break
+            fi
+            if [[ $i -eq 12 ]]; then
+              echo "::error::NetBird connected but 'dinkellabs' is not reachable — check the access-control policy in the NetBird UI (gha-runners → servers must allow ICMP/SSH)"
+              sudo netbird status || true
+              exit 1
+            fi
+            sleep 5
+          done
+
       - name: SSH deploy (forced-command)
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -165,7 +207,7 @@ jobs:
           set -euo pipefail
 
           if [[ -z "${DEPLOY_HOST:-}" ]]; then
-            echo "::error::DEPLOY_HOST repo variable not set"
+            echo "::error::DEPLOY_HOST repo variable not set (should be 'dinkellabs' — the server's NetBird hostname)"
             exit 1
           fi
           if [[ -z "${DEPLOY_SSH_KEY:-}" ]]; then
