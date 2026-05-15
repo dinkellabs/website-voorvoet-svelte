@@ -41,6 +41,21 @@ on:
       # to verify workflow changes.
       - '.github/workflows/**'
   workflow_dispatch:
+    inputs:
+      deploy_service:
+        description: 'Service to deploy. Leave blank for a build-only test run. Setting this switches to deploy-only mode — the build job is skipped and the tag below is deployed as-is.'
+        required: false
+        type: choice
+        options:
+          - ''
+          - voorvoeten-prod
+          - voorvoeten-dev
+        default: ''
+      deploy_tag:
+        description: 'Image tag to deploy (must already exist in GHCR). Required when deploy_service is set.'
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -60,6 +75,9 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    # Skip entirely in deploy-only workflow_dispatch mode. The deploy
+    # job runs the explicit (existing) image tag from the inputs.
+    if: github.event_name == 'push' || inputs.deploy_service == ''
     outputs:
       # Exposed for the `deploy` job: the *immutable* tag we just pushed
       # (VERSION on main, dev-<sha7> on dev) and the matching service name
@@ -86,20 +104,47 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Fail if VERSION tag already exists in GHCR (main only)
-        if: github.ref == 'refs/heads/main'
+      - name: Compute deploy target (service + immutable tag)
+        id: deploy_target
         run: |
-          IMAGE="${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:${{ steps.version.outputs.value }}"
-          if docker manifest inspect "$IMAGE" > /dev/null 2>&1; then
-            echo "::error::$IMAGE already exists in GHCR. Bump the VERSION file before merging to main."
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            echo "service=voorvoeten-prod" >> "$GITHUB_OUTPUT"
+            echo "tag=${{ steps.version.outputs.value }}" >> "$GITHUB_OUTPUT"
+          elif [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            echo "service=voorvoeten-dev" >> "$GITHUB_OUTPUT"
+            echo "tag=dev-${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::unsupported branch ${GITHUB_REF} for deploy target computation"
             exit 1
           fi
-          echo "$IMAGE is free — proceeding with build."
+
+      - name: Decide whether to build
+        # On main: existing VERSION tag in GHCR is a hard error — forces
+        # a VERSION bump per release (rollback discipline).
+        # On dev: existing dev-<sha7> tag means a workflow re-run on the
+        # same commit; skipping the build saves ~1-3 min and avoids
+        # rewriting the same image into the registry.
+        id: existing
+        run: |
+          IMAGE="${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:${{ steps.deploy_target.outputs.tag }}"
+          if docker manifest inspect "$IMAGE" > /dev/null 2>&1; then
+            if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+              echo "::error::$IMAGE already exists in GHCR. Bump the VERSION file before merging to main."
+              exit 1
+            fi
+            echo "::notice::$IMAGE already in GHCR — skipping build."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "$IMAGE is free — proceeding with build."
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up Docker Buildx
+        if: steps.existing.outputs.skip != 'true'
         uses: docker/setup-buildx-action@v3
 
       - name: Compute image tags
+        if: steps.existing.outputs.skip != 'true'
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -119,6 +164,7 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Build and push
+        if: steps.existing.outputs.skip != 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -129,43 +175,86 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Compute deploy target (service + immutable tag)
-        id: deploy_target
-        run: |
-          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-            echo "service=voorvoeten-prod" >> "$GITHUB_OUTPUT"
-            echo "tag=${{ steps.version.outputs.value }}" >> "$GITHUB_OUTPUT"
-          elif [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
-            echo "service=voorvoeten-dev" >> "$GITHUB_OUTPUT"
-            echo "tag=dev-${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
-          else
-            echo "::error::unsupported branch ${GITHUB_REF} for deploy target computation"
-            exit 1
-          fi
-
   deploy:
     # Triggers the server to pull + restart only the affected service. The
     # forced-command SSH key on the server makes the only thing this job
     # can do `/opt/voorvoeten/deploy.sh <service> <tag>` — see
-    # dinkellabs-infra/infra/cloud-init/bootstrap.yaml.tftpl. Skipped on
-    # workflow_dispatch unless explicitly opted in (see if: below).
+    # dinkellabs-infra/pyinfra/files/voorvoeten/deploy.sh. The runner
+    # reaches the server over NetBird (the Hetzner Cloud Firewall locks
+    # public 22 to the operator's home IP).
+    #
+    # Two trigger paths:
+    #   - push: deploys what build-and-push just produced.
+    #   - workflow_dispatch with deploy_service + deploy_tag: deploys an
+    #     existing GHCR tag without rebuilding (e.g. to re-run a failed
+    #     deploy step after the workflow itself was updated).
     needs: build-and-push
-    if: github.event_name == 'push'
+    if: |
+      always() &&
+      (
+        (github.event_name == 'push' && needs.build-and-push.result == 'success') ||
+        (github.event_name == 'workflow_dispatch' && inputs.deploy_service != '' && inputs.deploy_tag != '')
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      # `inputs.deploy_service`/`deploy_tag` only exist on
+      # workflow_dispatch; on push they're empty strings (GHA semantics)
+      # so the || falls back to the build-job outputs.
+      SERVICE: ${{ inputs.deploy_service || needs.build-and-push.outputs.deploy_service }}
+      TAG: ${{ inputs.deploy_tag || needs.build-and-push.outputs.deploy_tag }}
     steps:
+      - name: Join NetBird mesh
+        env:
+          NETBIRD_SETUP_KEY: ${{ secrets.NETBIRD_SETUP_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${NETBIRD_SETUP_KEY:-}" ]]; then
+            echo "::error::NETBIRD_SETUP_KEY repo secret not set"
+            exit 1
+          fi
+
+          # NetBird's official install script (CLI-only on GHA — no UI).
+          # The runner has passwordless sudo by default.
+          curl -fsSL https://pkgs.netbird.io/install.sh | sudo sh
+
+          # Register as an ephemeral peer. The setup key must be created
+          # in the NetBird UI with `Ephemeral peers` enabled so this peer
+          # auto-prunes 10 min after the job ends — otherwise each run
+          # would leak a peer entry. Hostname embeds the run id for
+          # traceability in the NetBird console.
+          sudo netbird up \
+              --setup-key "$NETBIRD_SETUP_KEY" \
+              --hostname "gha-voorvoeten-${GITHUB_RUN_ID}"
+
+          # Smoke check: resolve and ping the server peer over the mesh
+          # before handing off to ssh. Saves an opaque ssh timeout if
+          # NetBird is misconfigured. Uses the full peer FQDN so we
+          # don't depend on a search-domain trick.
+          for i in $(seq 1 12); do
+            if ping -c1 -W2 dinkellabs.netbird.cloud >/dev/null 2>&1; then
+              echo "::notice::NetBird up; 'dinkellabs.netbird.cloud' reachable"
+              break
+            fi
+            if [[ $i -eq 12 ]]; then
+              echo "::error::NetBird connected but 'dinkellabs.netbird.cloud' is not reachable — check the access-control policy in the NetBird UI (gha-runners → servers must allow ICMP/SSH)"
+              sudo netbird status || true
+              exit 1
+            fi
+            sleep 5
+          done
+
       - name: SSH deploy (forced-command)
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
           DEPLOY_USER: dinkellabs
-          SERVICE: ${{ needs.build-and-push.outputs.deploy_service }}
-          TAG: ${{ needs.build-and-push.outputs.deploy_tag }}
         run: |
           set -euo pipefail
 
           if [[ -z "${DEPLOY_HOST:-}" ]]; then
-            echo "::error::DEPLOY_HOST repo variable not set"
+            echo "::error::DEPLOY_HOST repo variable not set (should be 'dinkellabs.netbird.cloud' — the server's NetBird FQDN)"
             exit 1
           fi
           if [[ -z "${DEPLOY_SSH_KEY:-}" ]]; then
@@ -179,7 +268,10 @@ jobs:
 
           # The server's authorized_keys forces /opt/voorvoeten/deploy.sh
           # regardless of what we send. The args below land in the script's
-          # $SSH_ORIGINAL_COMMAND for validation + execution.
+          # $SSH_ORIGINAL_COMMAND for validation + execution. The script is
+          # itself idempotent — if `$TAG` matches the value already in
+          # /opt/voorvoeten/.env and the image hasn't changed, `docker
+          # compose up -d` is a no-op and no container restart happens.
           # UserKnownHostsFile=/dev/null because GHA runners are ephemeral;
           # accept-new pins host key for this run only.
           echo "::notice::deploying $SERVICE -> $TAG"
