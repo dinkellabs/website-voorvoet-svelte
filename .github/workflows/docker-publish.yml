@@ -182,14 +182,15 @@ jobs:
 
           # Smoke check: resolve and ping the server peer over the mesh
           # before handing off to ssh. Saves an opaque ssh timeout if
-          # NetBird is misconfigured.
+          # NetBird is misconfigured. Uses the full peer FQDN so we
+          # don't depend on a search-domain trick.
           for i in $(seq 1 12); do
-            if ping -c1 -W2 dinkellabs >/dev/null 2>&1; then
-              echo "::notice::NetBird up; 'dinkellabs' reachable"
+            if ping -c1 -W2 dinkellabs.netbird.cloud >/dev/null 2>&1; then
+              echo "::notice::NetBird up; 'dinkellabs.netbird.cloud' reachable"
               break
             fi
             if [[ $i -eq 12 ]]; then
-              echo "::error::NetBird connected but 'dinkellabs' is not reachable — check the access-control policy in the NetBird UI (gha-runners → servers must allow ICMP/SSH)"
+              echo "::error::NetBird connected but 'dinkellabs.netbird.cloud' is not reachable — check the access-control policy in the NetBird UI (gha-runners → servers must allow ICMP/SSH)"
               sudo netbird status || true
               exit 1
             fi
@@ -207,7 +208,7 @@ jobs:
           set -euo pipefail
 
           if [[ -z "${DEPLOY_HOST:-}" ]]; then
-            echo "::error::DEPLOY_HOST repo variable not set (should be 'dinkellabs' — the server's NetBird hostname)"
+            echo "::error::DEPLOY_HOST repo variable not set (should be 'dinkellabs.netbird.cloud' — the server's NetBird FQDN)"
             exit 1
           fi
           if [[ -z "${DEPLOY_SSH_KEY:-}" ]]; then
