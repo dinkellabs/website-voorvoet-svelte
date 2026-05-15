@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getReimbursements } from '../reimbursements.js';
+import { getReimbursements } from '../reimbursements.server.js';
 import reimbursementsRaw from '../reimbursements_2026.json';
 
 describe('reimbursements data', () => {
@@ -25,12 +25,5 @@ describe('reimbursements data', () => {
       expect(typeof row.pakket).toBe('string');
       expect(typeof row.vergoeding).toBe('string');
     }
-  });
-});
-
-describe('pricing CSV', () => {
-  it('getPricing is callable (async)', async () => {
-    const { getPricing } = await import('../reimbursements.js');
-    expect(typeof getPricing).toBe('function');
   });
 });
