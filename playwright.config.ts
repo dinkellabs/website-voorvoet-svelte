@@ -70,16 +70,15 @@ export default defineConfig({
       // Order spec submits 7 forms in a row; production 5-per-10-min cap
       // would fail the suite. See src/lib/server/rate-limiter.ts.
       E2E_DISABLE_RATE_LIMITER: 'true',
-      // Turnstile: server-side auto-pass. Intentionally leave
-      // PUBLIC_TURNSTILE_SITE_KEY empty so the form renders the hidden
-      // `turnstileToken=disabled` input instead of mounting the real
-      // Cloudflare widget — the live widget makes requests to
-      // challenges.cloudflare.com which never settle in CI and stall
-      // `waitForLoadState('networkidle')`.
-      TURNSTILE_ENABLED: 'false',
-      TURNSTILE_DUMMY_MODE: 'always_pass',
-      TURNSTILE_SECRET_KEY: '1x0000000000000000000000000000000AA',
-      PUBLIC_TURNSTILE_SITE_KEY: '',
+      // Cap: server-side auto-pass. Intentionally leave
+      // PUBLIC_CAP_API_ENDPOINT empty so the form renders the hidden
+      // `capToken=disabled` input instead of mounting the real widget —
+      // the live widget would issue background challenge/redeem fetches
+      // that never settle in CI and stall `waitForLoadState('networkidle')`.
+      CAP_ENABLED: 'false',
+      CAP_DUMMY_MODE: 'always_pass',
+      CAP_SECRET: '0000000000000000000000000000000000000000000000000000000000000000',
+      PUBLIC_CAP_API_ENDPOINT: '',
       // SMTP mock: point at a port that accepts+drops mail (started in globalSetup)
       SMTP_HOST: '127.0.0.1',
       SMTP_PORT: '2525',

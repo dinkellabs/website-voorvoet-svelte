@@ -5,7 +5,7 @@ const fetchMock = createFetchMock(vi);
 
 vi.mock('$env/dynamic/private', () => ({
   env: {
-    TURNSTILE_ENABLED: 'false',
+    CAP_ENABLED: 'false',
     SMTP_HOST: 'smtp.test.local',
     SMTP_PORT: '587',
     SMTP_USERNAME: 'user',
@@ -28,9 +28,9 @@ vi.mock('$lib/server/email', () => ({
   sendOrderEmail: mockSendOrderEmail,
 }));
 
-const mockVerifyTurnstile = vi.fn().mockResolvedValue(true);
-vi.mock('$lib/server/turnstile', () => ({
-  verifyTurnstileToken: mockVerifyTurnstile,
+const mockVerifyCap = vi.fn().mockResolvedValue(true);
+vi.mock('$lib/server/cap', () => ({
+  verifyCapToken: mockVerifyCap,
 }));
 
 const mockIsLimited = vi.fn().mockResolvedValue(false);
@@ -77,7 +77,7 @@ const validFields = {
   insole_type: 'Dagelijkse zolen',
   quantity: '2',
   notes: '',
-  turnstileToken: 'valid-token',
+  capToken: 'valid-token',
 };
 
 describe('orderAction', () => {
@@ -86,8 +86,8 @@ describe('orderAction', () => {
     fetchMock.resetMocks();
     mockTrackEvent.mockClear();
     mockSendOrderEmail.mockClear();
-    mockVerifyTurnstile.mockClear();
-    mockVerifyTurnstile.mockResolvedValue(true);
+    mockVerifyCap.mockClear();
+    mockVerifyCap.mockResolvedValue(true);
     mockSendOrderEmail.mockResolvedValue(undefined);
     mockIsLimited.mockClear();
     mockIsLimited.mockResolvedValue(false);
@@ -135,8 +135,8 @@ describe('orderAction', () => {
     expect(mockTrackEvent).not.toHaveBeenCalled();
   });
 
-  it('returns 400 with code turnstile_failed when Turnstile fails', async () => {
-    mockVerifyTurnstile.mockResolvedValue(false);
+  it('returns 400 with code cap_failed when Cap verification fails', async () => {
+    mockVerifyCap.mockResolvedValue(false);
 
     const { orderAction } = await import('../order/action.js');
     const event = buildEvent(buildFormData(validFields));
@@ -144,7 +144,7 @@ describe('orderAction', () => {
 
     expect(result).toMatchObject({
       status: 400,
-      data: expect.objectContaining({ code: 'turnstile_failed' }),
+      data: expect.objectContaining({ code: 'cap_failed' }),
     });
     expect(mockTrackEvent).not.toHaveBeenCalled();
   });
@@ -163,8 +163,8 @@ describe('orderAction', () => {
     expect(mockTrackEvent).not.toHaveBeenCalled();
   });
 
-  it('does not call trackEvent on Turnstile failure', async () => {
-    mockVerifyTurnstile.mockResolvedValue(false);
+  it('does not call trackEvent on Cap failure', async () => {
+    mockVerifyCap.mockResolvedValue(false);
 
     const { orderAction } = await import('../order/action.js');
     const event = buildEvent(buildFormData(validFields));
@@ -182,7 +182,7 @@ describe('orderAction', () => {
 
     await expect(orderAction(event)).rejects.toMatchObject({ status: 429 });
     expect(mockSendOrderEmail).not.toHaveBeenCalled();
-    expect(mockVerifyTurnstile).not.toHaveBeenCalled();
+    expect(mockVerifyCap).not.toHaveBeenCalled();
     expect(mockTrackEvent).not.toHaveBeenCalled();
   });
 });

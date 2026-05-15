@@ -26,8 +26,8 @@ pre-commit install
 
 # 5. Copy env and fill in values
 cp .env.example .env
-# Edit .env — at minimum set SMTP_* and Turnstile keys.
-# For local dev the defaults (Turnstile disabled, dummy SMTP) are fine.
+# Edit .env — at minimum set SMTP_* and CAP_SECRET (≥16 bytes).
+# For local dev the defaults (CAP_ENABLED=false, dummy SMTP) are fine.
 
 # 6. Start the dev server
 pnpm dev

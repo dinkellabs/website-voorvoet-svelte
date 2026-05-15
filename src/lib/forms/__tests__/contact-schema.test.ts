@@ -8,7 +8,7 @@ const validBase = {
   email: 'jan@example.nl',
   phone: '0612345678',
   description: 'Ik heb een vraag over mijn behandeling.',
-  turnstileToken: 'token-abc',
+  capToken: 'token-abc',
 };
 
 describe('contactSchema', () => {
@@ -84,15 +84,15 @@ describe('contactSchema', () => {
     expect(contactSchema.safeParse({ ...validBase, description: '' }).success).toBe(false);
   });
 
-  it('rejects missing turnstileToken', () => {
+  it('rejects missing capToken', () => {
     const rest = Object.fromEntries(
-      Object.entries(validBase).filter(([k]) => k !== 'turnstileToken'),
+      Object.entries(validBase).filter(([k]) => k !== 'capToken'),
     );
     expect(contactSchema.safeParse(rest).success).toBe(false);
   });
 
-  it('rejects empty turnstileToken', () => {
-    expect(contactSchema.safeParse({ ...validBase, turnstileToken: '' }).success).toBe(false);
+  it('rejects empty capToken', () => {
+    expect(contactSchema.safeParse({ ...validBase, capToken: '' }).success).toBe(false);
   });
 
   it.each([
@@ -100,7 +100,7 @@ describe('contactSchema', () => {
     ['name', undefined],
     ['email', undefined],
     ['description', undefined],
-    ['turnstileToken', undefined],
+    ['capToken', undefined],
   ])('rejects missing required field: %s', (field, value) => {
     const payload = { ...validBase, [field]: value };
     expect(contactSchema.safeParse(payload).success).toBe(false);
