@@ -1,6 +1,6 @@
 import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 import { randomUUID } from 'crypto';
-import { building, dev } from '$app/environment';
+import { building } from '$app/environment';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
 import logger, { withRequestId } from '$lib/server/logger.js';
@@ -22,7 +22,21 @@ const SKIP_TRACKING_PREFIXES = ['/health', '/sitemap.xml', '/robots.txt', '/csp-
 
 // ─── Boot-time guards ────────────────────────────────────────────────────────
 
-if (!dev && !building) {
+// Same hostname-based gate as cap.ts (see comment there). Duplicated rather
+// than shared because the two call sites diverge: this one warns, cap.ts
+// throws.
+function isRealProductionHost(): boolean {
+  if (building) return false;
+  const siteUrl = pubEnv.PUBLIC_SITE_URL;
+  if (!siteUrl) return true;
+  try {
+    return new URL(siteUrl).hostname === 'voorvoeten.nl';
+  } catch {
+    return true;
+  }
+}
+
+if (isRealProductionHost()) {
   const capEnabled = (env.CAP_ENABLED ?? 'false').toLowerCase() === 'true';
   if (!capEnabled) {
     logger.warn(
