@@ -172,7 +172,7 @@
   }
 
   .developer__img {
-    width: 180px;
+    width: 360px;
     height: auto;
     object-fit: cover;
     border-radius: 4px;
