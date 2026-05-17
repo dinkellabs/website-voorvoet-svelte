@@ -178,6 +178,7 @@
       aria-invalid={!!$errors.description}
       rows={5}
       maxlength={2000}
+      required
     ></textarea>
     {#if $errors.description}
       <p class="form-error">{translateFirstError($errors.description)}</p>
