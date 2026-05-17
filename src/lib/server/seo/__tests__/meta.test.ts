@@ -86,4 +86,20 @@ describe('buildAlternates', () => {
     const xDefault = alternates.find((a) => a.lang === 'x-default');
     expect(xDefault!.href).toBe('https://voorvoet.nl/nl/informatie');
   });
+
+  it('all alternates share one origin (no mixed staging/prod domains)', () => {
+    for (const pageKey of [
+      'home',
+      'information',
+      'reimbursements',
+      'contact',
+      'order_insoles',
+      'blog',
+      'credits',
+    ] as const) {
+      const alternates = buildAlternates(pageKey);
+      const origins = new Set(alternates.map((a) => new URL(a.href).origin));
+      expect(origins.size, `mixed origins on ${pageKey}: ${[...origins].join(', ')}`).toBe(1);
+    }
+  });
 });
