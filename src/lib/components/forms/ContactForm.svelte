@@ -41,6 +41,12 @@
     $form.capToken = 'disabled';
   }
 
+  // Gate submit on the actual schema so the button reflects real
+  // validity (email format, phone format, "Bel mij terug" requires
+  // phone via superRefine, …) instead of merely "not currently
+  // submitting". Zod stays the single source of truth.
+  const canSubmit = $derived(contactSchema.safeParse($form).success);
+
   let capWidget: HTMLElement | undefined = $state();
 
   onMount(() => {
@@ -201,7 +207,7 @@
       </div>
     {/if}
     <div class="form-submit-wrap">
-      <button type="submit" class="form-submit" disabled={$submitting}>
+      <button type="submit" class="form-submit" disabled={$submitting || !canSubmit}>
         {m.form_submit_contact()}
       </button>
     </div>
