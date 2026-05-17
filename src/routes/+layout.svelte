@@ -22,14 +22,30 @@
   const pageMeta = $derived(page.data.meta);
   const pageAlternates = $derived(page.data.alternates);
   const pageStructuredData = $derived(page.data.structuredData);
+  const siteStructuredData = $derived(page.data.siteStructuredData);
 
   const ogImage = $derived(pageMeta?.og?.image ?? defaultOgImage);
   const ogImageFull = $derived(ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`);
 
-  const structuredDataScript = $derived(
-    pageStructuredData
-      ? `<${'script'} type="application/ld+json">${JSON.stringify(pageStructuredData).replace(/</g, '\\u003c')}</${'script'}>`
-      : null,
+  // Merge site-wide (Organization, …) and per-page (Podiatrist,
+  // BlogPosting, …) structured data, then emit one <script> per entry so
+  // each is a distinct item to parsers/validators (matches OLD pattern).
+  const allStructuredData = $derived([
+    ...(siteStructuredData ?? []),
+    ...(Array.isArray(pageStructuredData)
+      ? pageStructuredData
+      : pageStructuredData
+        ? [pageStructuredData]
+        : []),
+  ] as Array<unknown>);
+
+  const structuredDataScripts = $derived(
+    allStructuredData
+      .map(
+        (item) =>
+          `<${'script'} type="application/ld+json">${JSON.stringify(item).replace(/</g, '\\u003c')}</${'script'}>`,
+      )
+      .join(''),
   );
 </script>
 
@@ -65,9 +81,9 @@
     {/each}
   {/if}
 
-  {#if structuredDataScript}
+  {#if structuredDataScripts}
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-    {@html structuredDataScript}
+    {@html structuredDataScripts}
   {/if}
 
   <link rel="icon" href="/favicon.ico" sizes="32x32" />
