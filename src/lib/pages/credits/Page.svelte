@@ -4,7 +4,6 @@
   import Section from '$lib/components/Section.svelte';
   import Container from '$lib/components/Container.svelte';
   import Title from '$lib/components/Title.svelte';
-  import Button from '$lib/components/Button.svelte';
   import { getPackages, getImageCredits } from '$lib/data/credits.js';
   import * as m from '$lib/paraglide/messages.js';
 
@@ -48,40 +47,40 @@
         <Title level={2} class="credits-section-title">{m.credits_developer_title()}</Title>
         <p class="developer__desc">{m.credits_developer_para1()}</p>
         <p class="developer__desc">{m.credits_developer_para2()}</p>
-        <p class="developer__desc">{m.credits_developer_para3()}</p>
-        <p class="developer__connect">
-          <Button variant="link" href="https://linkedin.com/in/dennisbakhuis" target="_blank">
-            LinkedIn
-          </Button>
-          <span class="developer__connect-sep">·</span>
-          <Button variant="link" href="https://github.com/dennisbakhuis" target="_blank">
-            GitHub
-          </Button>
-        </p>
       </div>
     </div>
-  </Container>
-</Section>
 
-<Section clipTop="gentle_1">
-  <Container>
-    <Title level={2} class="credits-section-title">{m.credits_packages_title()}</Title>
+    <p class="developer__desc developer__desc--full">
+      {#each m
+        .credits_developer_para3()
+        .split(/(LinkedIn|GitHub)/) as part, i (i)}{#if part === 'LinkedIn'}<a
+            href="https://linkedin.com/in/dennisbakhuis"
+            target="_blank"
+            rel="noopener noreferrer">LinkedIn</a
+          >{:else if part === 'GitHub'}<a
+            href="https://github.com/dennisbakhuis"
+            target="_blank"
+            rel="noopener noreferrer">GitHub</a
+          >{:else}{part}{/if}{/each}
+    </p>
+
+    <Title level={2} class="credits-section-title credits-section-title--sub">
+      {m.credits_packages_title()}
+    </Title>
     <div class="packages-list">
       {#each packages as pkg (pkg.name)}
         <div class="pkg-row">
-          <Button variant="link" href={pkg.url} target="_blank" class="pkg-name">
+          <a href={pkg.url} target="_blank" rel="noopener noreferrer" class="pkg-name-link">
             {pkg.name}
-          </Button>
+          </a>
           <span class="pkg-desc">{pkg.desc[lang] ?? pkg.desc.nl}</span>
         </div>
       {/each}
     </div>
-  </Container>
-</Section>
 
-<Section clipTop="gentle_1">
-  <Container>
-    <Title level={2} class="credits-section-title">{m.credits_images_title()}</Title>
+    <Title level={2} class="credits-section-title credits-section-title--sub">
+      {m.credits_images_title()}
+    </Title>
     <div class="images-table-wrap">
       <table class="images-table">
         <thead>
@@ -109,18 +108,18 @@
               <td>{img.desc[lang] ?? img.desc.nl}</td>
               <td>
                 {#if img.authorUrl}
-                  <Button variant="link" href={img.authorUrl} target="_blank">
+                  <a href={img.authorUrl} target="_blank" rel="noopener noreferrer">
                     {img.author ?? '—'}
-                  </Button>
+                  </a>
                 {:else}
                   {img.author ?? '—'}
                 {/if}
               </td>
               <td>
                 {#if img.sourceUrl}
-                  <Button variant="link" href={img.sourceUrl} target="_blank">
+                  <a href={img.sourceUrl} target="_blank" rel="noopener noreferrer">
                     {img.source}
-                  </Button>
+                  </a>
                 {:else}
                   {img.source}
                 {/if}
@@ -149,6 +148,13 @@
   :global(.credits-section-title) {
     font-size: clamp(1.2rem, 1.5vw + 0.5rem, 1.5rem);
     margin-bottom: 1rem;
+  }
+
+  /* h2s that introduce a new content block within the single Section get
+     extra space above so they read as section breaks in the absence of
+     visual dividers. */
+  :global(.credits-section-title--sub) {
+    margin-top: 2.5rem;
   }
 
   .developer {
@@ -184,13 +190,22 @@
     margin-bottom: 0.75rem;
   }
 
-  .developer__connect {
-    margin-top: 0.5rem;
+  /* Para3 sits outside the image+body row so it can span full width
+     below the photo (matches the Reflex original layout). */
+  .developer__desc--full {
+    margin-top: 1.25rem;
   }
 
-  .developer__connect-sep {
-    margin: 0 0.4rem;
-    color: var(--color-text-muted, #888);
+  /* Inline anchors inside developer__desc paragraphs should inherit the
+     paragraph's body-text size — Button variant="link" was inheriting
+     .btn's 1.5rem font-size, making LinkedIn / GitHub look oversized. */
+  .developer__desc :global(a) {
+    color: var(--color-text-link);
+    text-decoration: underline;
+  }
+
+  .developer__desc :global(a:hover) {
+    opacity: 0.85;
   }
 
   .packages-list {
@@ -206,15 +221,31 @@
     align-items: baseline;
   }
 
-  :global(.pkg-name) {
+  .pkg-name-link {
     font-weight: 600;
     min-width: 160px;
     flex-shrink: 0;
+    font-size: var(--font-size-regular);
+    color: var(--color-text-link);
+    text-decoration: underline;
+  }
+
+  .pkg-name-link:hover {
+    opacity: 0.85;
   }
 
   .pkg-desc {
     color: var(--color-text-content);
     font-size: var(--font-size-regular);
+  }
+
+  .images-table a {
+    color: var(--color-text-link);
+    text-decoration: underline;
+  }
+
+  .images-table a:hover {
+    opacity: 0.85;
   }
 
   .images-table-wrap {
