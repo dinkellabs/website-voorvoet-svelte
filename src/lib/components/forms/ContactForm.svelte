@@ -105,14 +105,7 @@
 
   <div class="form-row">
     <div class="form-group">
-      <label for="phone">
-        {m.form_phone_label()} <span class="required">*</span>
-        <span
-          class="tooltip-icon"
-          title={m.form_phone_tooltip()}
-          aria-label={m.form_phone_tooltip()}>ⓘ</span
-        >
-      </label>
+      <label for="phone">{m.form_phone_label()} <span class="required">*</span></label>
       <input
         id="phone"
         name="phone"
@@ -129,14 +122,7 @@
     </div>
 
     <div class="form-group">
-      <label for="email">
-        {m.form_email_label()} <span class="required">*</span>
-        <span
-          class="tooltip-icon"
-          title={m.form_email_tooltip()}
-          aria-label={m.form_email_tooltip()}>ⓘ</span
-        >
-      </label>
+      <label for="email">{m.form_email_label()} <span class="required">*</span></label>
       <input
         id="email"
         name="email"
@@ -278,14 +264,6 @@
     align-items: center;
     gap: 0.25rem;
     flex-wrap: wrap;
-  }
-
-  .tooltip-icon {
-    font-size: 0.875rem;
-    color: var(--color-primary-300);
-    cursor: help;
-    font-weight: 400;
-    flex-shrink: 0;
   }
 
   .required {
