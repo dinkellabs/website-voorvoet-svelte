@@ -110,8 +110,20 @@
         id="phone"
         name="phone"
         type="tel"
+        inputmode="numeric"
+        autocomplete="tel"
+        maxlength="10"
         placeholder={m.form_phone_placeholder()}
-        bind:value={$form.phone}
+        value={$form.phone}
+        oninput={(e) => {
+          // Strip non-digits live (paste-friendly) and cap at 10 so the
+          // schema's /^\d{10}$/ check can't fail on stray symbols the
+          // user typed by reflex (spaces, dashes, "+31").
+          const t = e.currentTarget;
+          const cleaned = t.value.replace(/\D/g, '').slice(0, 10);
+          if (t.value !== cleaned) t.value = cleaned;
+          $form.phone = cleaned;
+        }}
         aria-invalid={!!$errors.phone}
         title={m.form_phone_tooltip()}
         required
