@@ -80,7 +80,7 @@
 <form method="POST" use:enhance class="order-form">
   <div class="form-row">
     <div class="form-group">
-      <label for="first_name">{m.form_first_name_label()}</label>
+      <label for="first_name">{m.form_first_name_label()} <span class="required">*</span></label>
       <input
         id="first_name"
         name="first_name"
@@ -96,7 +96,7 @@
     </div>
 
     <div class="form-group">
-      <label for="last_name">{m.form_last_name_label()}</label>
+      <label for="last_name">{m.form_last_name_label()} <span class="required">*</span></label>
       <input
         id="last_name"
         name="last_name"
@@ -113,7 +113,7 @@
   </div>
 
   <div class="form-group">
-    <label for="email">{m.form_email_label()}</label>
+    <label for="email">{m.form_email_label()} <span class="required">*</span></label>
     <input
       id="email"
       name="email"
@@ -131,7 +131,7 @@
 
   <div class="form-row">
     <div class="form-group">
-      <label for="birth_date">{m.form_birth_date_label()}</label>
+      <label for="birth_date">{m.form_birth_date_label()} <span class="required">*</span></label>
       <input
         id="birth_date"
         name="birth_date"
@@ -289,6 +289,11 @@
     font-size: var(--font-size-regular);
     color: var(--color-text-heading);
     margin: 0;
+  }
+
+  .required {
+    color: var(--color-error, #e74c3c);
+    font-weight: 700;
   }
 
   input,
