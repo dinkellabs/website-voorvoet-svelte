@@ -67,14 +67,11 @@
     'Zolen voor werkschoenen': m.form_insole_type_work(),
   };
 
-  const canSubmit = $derived(
-    $form.first_name?.trim().length > 0 &&
-      $form.last_name?.trim().length > 0 &&
-      $form.email?.trim().length > 0 &&
-      $form.birth_date?.trim().length > 0 &&
-      !!$form.insole_type &&
-      ($form.capToken?.length ?? 0) > 0,
-  );
+  // Gate submit on the actual schema so the button reflects real
+  // validity (email format, birth-date pattern, …) instead of just
+  // field presence. Zod is the single source of truth — manual checks
+  // would silently drift if a field rule changes.
+  const canSubmit = $derived(orderSchema.safeParse($form).success);
 </script>
 
 <form method="POST" use:enhance class="order-form">
