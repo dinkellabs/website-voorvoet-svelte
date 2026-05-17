@@ -65,6 +65,10 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="VoorVoet" />
 
+  {#if pageMeta?.og?.locale}
+    <meta property="og:locale" content={pageMeta.og.locale} />
+  {/if}
+
   <meta property="og:image" content={ogImageFull} />
   <meta name="twitter:image" content={ogImageFull} />
 
