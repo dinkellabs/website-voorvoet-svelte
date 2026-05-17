@@ -301,6 +301,7 @@
   textarea {
     font-family: var(--font-family);
     font-size: var(--font-size-regular);
+    line-height: 1.5;
     color: var(--color-text-content);
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -309,6 +310,20 @@
     box-sizing: border-box;
     transition: border-color 0.15s ease;
     background-color: white;
+  }
+
+  /* UA stylesheets add their own chrome to <select> (Safari ~4px taller
+     than <input> at the same padding). Strip the native appearance and
+     paint a custom caret so select height matches inputs. */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image:
+      url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3e%3cpath fill='none' stroke='%23555' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5l5 5 5-5'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 0.75rem auto;
+    padding-right: 2.25rem;
   }
 
   input:focus,
