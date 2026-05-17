@@ -46,10 +46,16 @@
       />
       <div class="developer__body">
         <Title level={2} class="credits-section-title">{m.credits_developer_title()}</Title>
-        <p class="developer__desc">{m.credits_developer_desc()}</p>
+        <p class="developer__desc">{m.credits_developer_para1()}</p>
+        <p class="developer__desc">{m.credits_developer_para2()}</p>
+        <p class="developer__desc">{m.credits_developer_para3()}</p>
         <p class="developer__connect">
           <Button variant="link" href="https://linkedin.com/in/dennisbakhuis" target="_blank">
             LinkedIn
+          </Button>
+          <span class="developer__connect-sep">·</span>
+          <Button variant="link" href="https://github.com/dennisbakhuis" target="_blank">
+            GitHub
           </Button>
         </p>
       </div>
@@ -180,6 +186,11 @@
 
   .developer__connect {
     margin-top: 0.5rem;
+  }
+
+  .developer__connect-sep {
+    margin: 0 0.4rem;
+    color: var(--color-text-muted, #888);
   }
 
   .packages-list {
