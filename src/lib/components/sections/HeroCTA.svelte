@@ -14,6 +14,7 @@
   let { lang, title, items }: Props = $props();
 
   const href = $derived(page.data.planPortalUrl || routeFor('contact', lang));
+  const isExternal = $derived(!!page.data.planPortalUrl);
 </script>
 
 <div
@@ -34,7 +35,12 @@
     </ul>
   </div>
   <div class="hero-cta__btn-wrap">
-    <a {href} class="hero-cta__btn">{m.cta_book_appointment()}</a>
+    <a
+      {href}
+      class="hero-cta__btn"
+      target={isExternal ? '_blank' : undefined}
+      rel={isExternal ? 'noopener noreferrer' : undefined}
+    >{m.cta_book_appointment()}</a>
   </div>
 </div>
 

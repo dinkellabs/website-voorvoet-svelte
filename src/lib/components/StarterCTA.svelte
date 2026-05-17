@@ -11,9 +11,15 @@
   let { lang }: Props = $props();
 
   const href = $derived(page.data.planPortalUrl || routeFor('contact', lang));
+  const isExternal = $derived(!!page.data.planPortalUrl);
 </script>
 
-<a {href} class="starter-cta">
+<a
+  {href}
+  class="starter-cta"
+  target={isExternal ? '_blank' : undefined}
+  rel={isExternal ? 'noopener noreferrer' : undefined}
+>
   {m.cta_book_appointment()}
 </a>
 

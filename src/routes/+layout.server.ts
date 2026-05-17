@@ -2,6 +2,7 @@ import { env } from '$env/dynamic/public';
 import { env as privateEnv } from '$env/dynamic/private';
 import type { PageKey, Lang } from '$lib/i18n/route-map.js';
 import { pageKeyForPath } from '$lib/i18n/route-map.js';
+import { organizationLD } from '$lib/seo/structured-data.js';
 import type { LayoutServerLoad } from './$types.js';
 
 export const load: LayoutServerLoad = ({ url, params }) => {
@@ -19,6 +20,7 @@ export const load: LayoutServerLoad = ({ url, params }) => {
     lang: Lang;
     pageKey: PageKey | null;
     currentPath: string;
+    siteStructuredData: Array<Record<string, unknown>>;
     umamiScriptUrl?: string;
     umamiWebsiteId?: string;
     planPortalUrl?: string;
@@ -26,6 +28,7 @@ export const load: LayoutServerLoad = ({ url, params }) => {
     lang,
     pageKey,
     currentPath,
+    siteStructuredData: [organizationLD()],
   };
 
   if (env.PUBLIC_UMAMI_SCRIPT_URL) {

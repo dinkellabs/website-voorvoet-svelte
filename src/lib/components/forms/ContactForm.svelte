@@ -41,6 +41,12 @@
     $form.capToken = 'disabled';
   }
 
+  // Gate submit on the actual schema so the button reflects real
+  // validity (email format, phone format, "Bel mij terug" requires
+  // phone via superRefine, …) instead of merely "not currently
+  // submitting". Zod stays the single source of truth.
+  const canSubmit = $derived(contactSchema.safeParse($form).success);
+
   let capWidget: HTMLElement | undefined = $state();
 
   onMount(() => {
@@ -99,20 +105,25 @@
 
   <div class="form-row">
     <div class="form-group">
-      <label for="phone">
-        {m.form_phone_label()} <span class="required">*</span>
-        <span
-          class="tooltip-icon"
-          title={m.form_phone_tooltip()}
-          aria-label={m.form_phone_tooltip()}>ⓘ</span
-        >
-      </label>
+      <label for="phone">{m.form_phone_label()} <span class="required">*</span></label>
       <input
         id="phone"
         name="phone"
         type="tel"
+        inputmode="numeric"
+        autocomplete="tel"
+        maxlength="10"
         placeholder={m.form_phone_placeholder()}
-        bind:value={$form.phone}
+        value={$form.phone}
+        oninput={(e) => {
+          // Strip non-digits live (paste-friendly) and cap at 10 so the
+          // schema's /^\d{10}$/ check can't fail on stray symbols the
+          // user typed by reflex (spaces, dashes, "+31").
+          const t = e.currentTarget;
+          const cleaned = t.value.replace(/\D/g, '').slice(0, 10);
+          if (t.value !== cleaned) t.value = cleaned;
+          $form.phone = cleaned;
+        }}
         aria-invalid={!!$errors.phone}
         title={m.form_phone_tooltip()}
         required
@@ -123,14 +134,7 @@
     </div>
 
     <div class="form-group">
-      <label for="email">
-        {m.form_email_label()} <span class="required">*</span>
-        <span
-          class="tooltip-icon"
-          title={m.form_email_tooltip()}
-          aria-label={m.form_email_tooltip()}>ⓘ</span
-        >
-      </label>
+      <label for="email">{m.form_email_label()} <span class="required">*</span></label>
       <input
         id="email"
         name="email"
@@ -178,6 +182,7 @@
       aria-invalid={!!$errors.description}
       rows={5}
       maxlength={2000}
+      required
     ></textarea>
     {#if $errors.description}
       <p class="form-error">{translateFirstError($errors.description)}</p>
@@ -200,7 +205,7 @@
       </div>
     {/if}
     <div class="form-submit-wrap">
-      <button type="submit" class="form-submit" disabled={$submitting}>
+      <button type="submit" class="form-submit" disabled={$submitting || !canSubmit}>
         {m.form_submit_contact()}
       </button>
     </div>
@@ -271,14 +276,6 @@
     align-items: center;
     gap: 0.25rem;
     flex-wrap: wrap;
-  }
-
-  .tooltip-icon {
-    font-size: 0.875rem;
-    color: var(--color-primary-300);
-    cursor: help;
-    font-weight: 400;
-    flex-shrink: 0;
   }
 
   .required {

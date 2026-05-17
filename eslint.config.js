@@ -39,6 +39,7 @@ export default tseslint.config(
       'test-results/**',
       'src/lib/paraglide/**',
       'lighthouse/lighthouserc.cjs',
+      'artifacts/**',
     ],
   },
 );

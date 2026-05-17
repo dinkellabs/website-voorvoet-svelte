@@ -21,6 +21,7 @@ declare global {
       };
       alternates?: Array<{ lang: string; href: string }>;
       structuredData?: Record<string, unknown> | Array<unknown>;
+      siteStructuredData?: Array<Record<string, unknown>>;
       flash?: { type: 'success' | 'error'; text: string };
     }
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type

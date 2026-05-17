@@ -1,8 +1,10 @@
 import { redirect } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
 import type { PageServerLoad } from './$types.js';
-import { LANGS, langFromParams, routeFor } from '$lib/i18n/route-map.js';
+import { langFromParams, routeFor } from '$lib/i18n/route-map.js';
 import { getPostsByLang } from '$lib/blog/loader.js';
-import { PAGE_TITLES, PAGE_DESCRIPTIONS } from '$lib/i18n/page-meta.js';
+import { buildMeta } from '$lib/server/seo/meta.js';
+import { buildAlternates } from '$lib/server/seo/alternates.js';
 
 const POSTS_PER_PAGE = 6;
 
@@ -25,25 +27,21 @@ export const load: PageServerLoad = ({ params, url }) => {
   const pagePosts = posts.slice(start, start + POSTS_PER_PAGE);
 
   const blogBase = routeFor('blog', lang);
-  const siteUrl = 'https://voorvoet.nl';
+  const siteUrl = env.SITE_URL ?? 'https://voorvoet.nl';
   const canonical = `${siteUrl}${blogBase}${safePage > 1 ? `?page=${safePage}` : ''}`;
 
-  const alternates: Array<{ lang: string; href: string }> = LANGS.map((l) => ({
-    lang: l,
-    href: `${siteUrl}${routeFor('blog', l)}`,
-  }));
-  alternates.push({ lang: 'x-default', href: `${siteUrl}${routeFor('blog', 'nl')}` });
+  // Use buildMeta to inherit og:image (blog preview), og:locale, twitter
+  // tags etc., then override canonical to keep the pagination query string.
+  const baseMeta = buildMeta({ pageKey: 'blog', lang, url: canonical });
+  const meta = { ...baseMeta, canonical };
+  const alternates = buildAlternates('blog');
 
   return {
     posts: pagePosts,
     currentPage: safePage,
     totalPages,
     blogBase,
-    meta: {
-      title: PAGE_TITLES[lang]['blog'],
-      description: PAGE_DESCRIPTIONS[lang]['blog'],
-      canonical,
-    },
+    meta,
     alternates,
   };
 };

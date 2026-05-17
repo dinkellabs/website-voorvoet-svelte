@@ -1,5 +1,5 @@
 import { env } from '$env/dynamic/private';
-import type { ReimbursementRow, PricingRow } from './reimbursements-types.js';
+import type { ReimbursementRow, PricingRow, OrderPairPricing } from './reimbursements-types.js';
 
 const reimbursementsFiles = import.meta.glob<ReimbursementRow[]>('./reimbursements_*.json', {
   eager: true,
@@ -81,4 +81,25 @@ export function getPricing(): PricingRow[] {
   return parseCsv(csv);
 }
 
-export type { ReimbursementRow, PricingRow };
+// Treatment names in the source CSV. Single source of truth so the order
+// page and the pricing CSV can't drift apart silently.
+const ORDER_INSOLES_PRICING_KEYS = {
+  extraPair: 'Podotherapeutische zolen extra paar',
+  workShoes: 'Podotherapeutische zolen extra paar voor werkschoenen',
+} as const;
+
+/**
+ * Look up the two prices shown on the order_insoles page from the pricing
+ * CSV so the page can't show stale figures when the yearly price list
+ * rolls over.
+ */
+export function getOrderPairPricing(): OrderPairPricing {
+  const rows = getPricing();
+  const find = (name: string) => rows.find((r) => r.behandeling === name)?.prijs ?? '';
+  return {
+    extraPair: find(ORDER_INSOLES_PRICING_KEYS.extraPair),
+    workShoes: find(ORDER_INSOLES_PRICING_KEYS.workShoes),
+  };
+}
+
+export type { ReimbursementRow, PricingRow, OrderPairPricing };
