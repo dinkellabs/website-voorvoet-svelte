@@ -66,6 +66,15 @@
     Sportzolen: m.form_insole_type_sport(),
     'Zolen voor werkschoenen': m.form_insole_type_work(),
   };
+
+  const canSubmit = $derived(
+    $form.first_name?.trim().length > 0 &&
+      $form.last_name?.trim().length > 0 &&
+      $form.email?.trim().length > 0 &&
+      $form.birth_date?.trim().length > 0 &&
+      !!$form.insole_type &&
+      ($form.capToken?.length ?? 0) > 0,
+  );
 </script>
 
 <form method="POST" use:enhance class="order-form">
@@ -76,6 +85,7 @@
         id="first_name"
         name="first_name"
         type="text"
+        required
         placeholder={m.form_first_name_placeholder()}
         bind:value={$form.first_name}
         aria-invalid={!!$errors.first_name}
@@ -91,6 +101,7 @@
         id="last_name"
         name="last_name"
         type="text"
+        required
         placeholder={m.form_last_name_placeholder()}
         bind:value={$form.last_name}
         aria-invalid={!!$errors.last_name}
@@ -107,6 +118,7 @@
       id="email"
       name="email"
       type="email"
+      required
       placeholder={m.form_email_placeholder()}
       bind:value={$form.email}
       aria-invalid={!!$errors.email}
@@ -124,6 +136,7 @@
         id="birth_date"
         name="birth_date"
         type="text"
+        required
         placeholder={m.form_birth_date_placeholder()}
         bind:value={$form.birth_date}
         aria-invalid={!!$errors.birth_date}
@@ -203,7 +216,7 @@
   {/if}
 
   <div class="form-submit-row">
-    <button type="submit" class="form-submit" disabled={$submitting}>
+    <button type="submit" class="form-submit" disabled={$submitting || !canSubmit}>
       {m.form_submit_order_insoles()}
     </button>
   </div>
