@@ -281,9 +281,11 @@
   "reimb_starter_intro": "Auf dieser Seite finden Sie eine Übersicht über die möglichen Erstattungen von Krankenversicherungen und die Tarife, die VoorVoet - Praxis für Podotherapie anwendet.",
   "info_starter_title": "Alles über Podotherapie",
   "info_starter_intro": "Auf dieser Seite finden Sie umfassende Informationen über Podotherapie und bei welchen Beschwerden Sie zu uns kommen können - von Fuß- und Knöchelproblemen bis hin zu Knie-, Hüft- und Rückenbeschwerden, die ihren Ursprung in den Füßen haben. Sie erfahren auch, wie ein Behandlungsverlauf aussieht, vom Erstgespräch über die Behandlung bis zur Nachsorge.\nAls anerkannte Podotherapeuten nehmen wir uns Zeit für eine gründliche Analyse und erstellen einen maßgeschneiderten Behandlungsplan, der auf Ihre spezifische Situation zugeschnitten ist.",
-  "order_pricing_extra_pair": "Zusätzliches Paar podotherapeutische Einlagen: € 135,00 pro Paar.",
-  "order_pricing_workshoes": "Zusätzliches Paar für Arbeitsschuhe: € 180,00 pro Paar.",
-  "order_pricing_link": "Alle Tarife finden Sie in unserer Preisliste.",
+  "order_intro_p1": "Ein zusätzliches Paar Einlagen kann praktisch sein, um sie beispielsweise mit einem anderen Paar Schuhen zu verwenden, etwa in Ihren Sport- oder Wanderschuhen. Dies erspart nicht nur den Aufwand des Wechselns, sondern verlängert auch die Lebensdauer der Einlagen.",
+  "order_intro_p2": "Ein zusätzliches Paar Einlagen ist nur möglich, wenn Sie bereits bei VoorVoet waren und wir einen digitalen Scan Ihres Fußes haben. Wenn der Scan Ihres Fußes länger als ein Jahr zurückliegt, ist es ratsam, eine Kontrolle zu vereinbaren.",
+  "order_pricing_extra_pair": "Zusätzliches Paar podotherapeutische Einlagen: {price} pro Paar.",
+  "order_pricing_workshoes": "Zusätzliches Paar für Arbeitsschuhe: {price} pro Paar.",
+  "order_pricing_link": "Sehen Sie sich alle Tarife in unserer Preisliste an.",
   "credits_page_title": "Credits",
   "credits_page_intro": "Websites bauen ist Teamarbeit, auch wenn man alleine am Laptop sitzt. Hier ein Dankeschön an alle Tools, Bilder und Menschen, die diese Website möglich gemacht haben."
 }

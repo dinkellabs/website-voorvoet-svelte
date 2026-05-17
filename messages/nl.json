@@ -281,8 +281,10 @@
   "reimb_starter_intro": "Op deze pagina is een overzicht te vinden van de mogelijke vergoedingen van zorgverzekeraars en de tarieven die VoorVoet - Praktijk voor podotherapie hanteert.",
   "info_starter_title": "Alles over podotherapie",
   "info_starter_intro": "Op deze pagina vind je uitgebreide informatie over podotherapie en bij welke klachten je bij ons terecht kunt - van voet- en enkelproblemen tot knie-, heup- en rugklachten die hun oorsprong vinden in de voeten. Ook lees je hoe een behandeltraject eruitziet, van eerste consult tot behandeling en nazorg.\nAls erkende podotherapeuten nemen we de tijd voor grondige analyse en stellen we een behandelplan op maat op dat aansluit bij jouw specifieke situatie.",
-  "order_pricing_extra_pair": "Extra paar podotherapeutische zolen: € 135,00 per paar.",
-  "order_pricing_workshoes": "Extra paar voor werkschoenen: € 180,00 per paar.",
+  "order_intro_p1": "Een extra paar zolen kan handig zijn om bijvoorbeeld met een ander paar schoenen te gebruiken, bijvoorbeeld in uw sport- of wandelschoenen. Dit scheelt niet alleen gedoe met wisselen maar verlengt ook de levensduur van de zolen.",
+  "order_intro_p2": "Een extra paar zolen kan alleen als u al eens eerder bij VoorVoet bent geweest en wij een digitale scan van de voet hebben. Als het langer dan een jaar geleden is dat u een scan van uw voet heeft laten maken is het raadzaam om een controle in te plannen.",
+  "order_pricing_extra_pair": "Extra paar podotherapeutische zolen: {price} per paar.",
+  "order_pricing_workshoes": "Extra paar voor werkschoenen: {price} per paar.",
   "order_pricing_link": "Kijk voor alle tarieven op onze tarievenlijst.",
   "credits_page_title": "Credits",
   "credits_page_intro": "Websites bouwen is teamwork, ook al zit je alleen achter je laptop. Hier een bedankje aan alle tools, afbeeldingen en mensen die deze website mogelijk hebben gemaakt."

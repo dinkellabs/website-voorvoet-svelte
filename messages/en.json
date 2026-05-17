@@ -281,9 +281,11 @@
   "reimb_starter_intro": "On this page you can find an overview of possible reimbursements from health insurers and the rates that VoorVoet - Practice for Podotherapy applies.",
   "info_starter_title": "Everything about podotherapy",
   "info_starter_intro": "On this page you will find extensive information about podotherapy and which complaints you can come to us with - from foot and ankle problems to knee, hip and back complaints that originate in the feet. You will also read about what a treatment process looks like, from the first consultation to treatment and aftercare.\nAs certified podotherapists, we take the time for thorough analysis and create a customized treatment plan that fits your specific situation.",
-  "order_pricing_extra_pair": "Extra pair of podotherapeutic insoles: € 135.00 per pair.",
-  "order_pricing_workshoes": "Extra pair for work shoes: € 180.00 per pair.",
-  "order_pricing_link": "See our price list for all rates.",
+  "order_intro_p1": "An extra pair of insoles can be handy to use with a different pair of shoes, for example in your sports or hiking shoes. This not only saves the hassle of switching but also extends the lifespan of the insoles.",
+  "order_intro_p2": "An extra pair of insoles is only possible if you have been to VoorVoet before and we have a digital scan of your foot. If it has been longer than a year since you had a scan of your foot, it is advisable to schedule a check-up.",
+  "order_pricing_extra_pair": "Extra pair of podotherapeutic insoles: {price} per pair.",
+  "order_pricing_workshoes": "Extra pair for work shoes: {price} per pair.",
+  "order_pricing_link": "See all rates on our pricing list.",
   "credits_page_title": "Credits",
   "credits_page_intro": "Building websites is a team effort, even when you're sitting alone at your laptop. Here's a shout-out to all the tools, images, and people that made this website possible."
 }
