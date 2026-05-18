@@ -5,6 +5,7 @@ import { langFromParams, type PageKey } from '$lib/i18n/route-map.js';
 import { assertLangForSlug } from '$lib/forms/assert-lang.js';
 import { buildMeta } from '$lib/server/seo/meta.js';
 import { buildAlternates } from '$lib/server/seo/alternates.js';
+import { getOrderPairPricing } from '$lib/data/reimbursements.server.js';
 
 interface FormPageOptions {
   pageKey: PageKey;
@@ -22,11 +23,17 @@ export function makeFormLoad({ pageKey, slug, schema }: FormPageOptions) {
     const lang = langFromParams(params);
     const form = await superValidate(zod(schema));
 
-    return {
+    const base = {
       form,
       meta: buildMeta({ pageKey, lang, url: url.href }),
       alternates: buildAlternates(pageKey),
     };
+
+    if (pageKey === 'order_insoles') {
+      return { ...base, orderPricing: getOrderPairPricing() };
+    }
+
+    return base;
   };
 }
 

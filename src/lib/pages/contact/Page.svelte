@@ -31,7 +31,9 @@
 <Section class="contact-starter-section" paddingBottom="3rem">
   <Container>
     <Title level={1} class="contact-starter__title">{m.contact_page_title()}</Title>
-    <p class="contact-starter__desc">{m.contact_page_intro()}</p>
+    <p class="contact-starter__desc">{m.contact_page_intro_p1()}</p>
+    <p class="contact-starter__desc">{m.contact_page_intro_p2()}</p>
+    <p class="contact-starter__desc">{m.contact_page_intro_p3()}</p>
   </Container>
 </Section>
 
@@ -59,5 +61,10 @@
     font-size: var(--font-size-regular);
     line-height: 1.7;
     color: var(--color-text-content);
+    margin-bottom: 0.75rem;
+  }
+
+  .contact-starter__desc:last-of-type {
+    margin-bottom: 0;
   }
 </style>

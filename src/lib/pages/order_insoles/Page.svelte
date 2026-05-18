@@ -3,6 +3,7 @@
   import { routeFor } from '$lib/i18n/route-map.js';
   import type { SuperValidated } from 'sveltekit-superforms';
   import type { OrderFormData } from '$lib/forms/order-schema.js';
+  import type { OrderPairPricing } from '$lib/data/reimbursements-types.js';
   import HeroBanner from '$lib/components/HeroBanner.svelte';
   import Section from '$lib/components/Section.svelte';
   import Container from '$lib/components/Container.svelte';
@@ -14,9 +15,10 @@
   interface Props {
     lang: Lang;
     formData: SuperValidated<OrderFormData>;
+    pricing: OrderPairPricing;
   }
 
-  let { lang, formData }: Props = $props();
+  let { lang, formData, pricing }: Props = $props();
 
   const reimbHref = $derived(routeFor('reimbursements', lang));
 </script>
@@ -35,8 +37,14 @@
   <Container>
     <div class="order-starter">
       <Title level={1} class="order-starter__title">{m.order_page_title()}</Title>
-      <p class="order-starter__pricing">{m.order_pricing_extra_pair()}</p>
-      <p class="order-starter__pricing">{m.order_pricing_workshoes()}</p>
+      <p class="order-starter__intro">{m.order_intro_p1()}</p>
+      <p class="order-starter__intro">{m.order_intro_p2()}</p>
+      <p class="order-starter__pricing">
+        {m.order_pricing_extra_pair({ price: pricing.extraPair })}
+      </p>
+      <p class="order-starter__pricing">
+        {m.order_pricing_workshoes({ price: pricing.workShoes })}
+      </p>
       <p class="order-starter__pricing">
         <Button variant="link" href={reimbHref}>{m.order_pricing_link()}</Button>
       </p>
@@ -56,11 +64,23 @@
     margin-bottom: 0.75rem;
   }
 
+  .order-starter__intro {
+    font-size: var(--font-size-regular);
+    line-height: 1.7;
+    color: var(--color-text-content);
+    margin-bottom: 0.75rem;
+  }
+
   .order-starter__pricing {
     font-size: var(--font-size-regular);
     line-height: 1.7;
     color: var(--color-text-content);
     margin-bottom: 0.25rem;
+  }
+
+  /* Visual breather between the intro paragraphs and the pricing block. */
+  .order-starter__pricing:first-of-type {
+    margin-top: 1rem;
   }
 
   .order-starter__terms {

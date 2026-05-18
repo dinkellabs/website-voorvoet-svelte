@@ -41,3 +41,8 @@ Thumbs.db
 # Claude Code / AI tooling
 .claude/
 CLAUDE.local.md
+
+# Site-parity investigation artefacts (PNG diffs, JSON dumps, logs).
+# Tracked docs/ reports reference these by path but the artefacts themselves
+# are too large and ephemeral to commit.
+artifacts/

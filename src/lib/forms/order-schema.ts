@@ -15,7 +15,7 @@ export const orderSchema = z.object({
     .or(z.literal('')),
   birth_date: z.string().regex(DATE_REGEX, 'birth_date_invalid'),
   insole_type: z.enum(INSOLE_TYPES),
-  quantity: z.coerce.number().int().min(1, 'quantity_invalid').max(3, 'quantity_invalid'),
+  quantity: z.coerce.number().int().min(1, 'quantity_invalid').max(3, 'quantity_invalid').default(1),
   notes: z.string().max(1000, 'notes_too_long').optional().default(''),
   capToken: z.string().min(1, 'cap_required'),
 });

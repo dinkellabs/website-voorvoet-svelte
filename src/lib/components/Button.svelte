@@ -121,8 +121,13 @@
   }
 
   .btn--link {
+    /* Reset the base .btn box so a link variant flows as inline text in
+       a paragraph: inherit font-size (.btn forces 1.5rem), drop the
+       inline-flex container, and let the underline track the line-box. */
+    display: inline;
     background-color: transparent;
     color: var(--color-text-link);
+    font-size: inherit;
     font-weight: 400;
     padding: 0;
     text-decoration: underline;

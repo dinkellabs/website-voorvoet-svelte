@@ -66,16 +66,23 @@
     Sportzolen: m.form_insole_type_sport(),
     'Zolen voor werkschoenen': m.form_insole_type_work(),
   };
+
+  // Gate submit on the actual schema so the button reflects real
+  // validity (email format, birth-date pattern, …) instead of just
+  // field presence. Zod is the single source of truth — manual checks
+  // would silently drift if a field rule changes.
+  const canSubmit = $derived(orderSchema.safeParse($form).success);
 </script>
 
 <form method="POST" use:enhance class="order-form">
   <div class="form-row">
     <div class="form-group">
-      <label for="first_name">{m.form_first_name_label()}</label>
+      <label for="first_name">{m.form_first_name_label()} <span class="required">*</span></label>
       <input
         id="first_name"
         name="first_name"
         type="text"
+        required
         placeholder={m.form_first_name_placeholder()}
         bind:value={$form.first_name}
         aria-invalid={!!$errors.first_name}
@@ -86,11 +93,12 @@
     </div>
 
     <div class="form-group">
-      <label for="last_name">{m.form_last_name_label()}</label>
+      <label for="last_name">{m.form_last_name_label()} <span class="required">*</span></label>
       <input
         id="last_name"
         name="last_name"
         type="text"
+        required
         placeholder={m.form_last_name_placeholder()}
         bind:value={$form.last_name}
         aria-invalid={!!$errors.last_name}
@@ -102,11 +110,12 @@
   </div>
 
   <div class="form-group">
-    <label for="email">{m.form_email_label()}</label>
+    <label for="email">{m.form_email_label()} <span class="required">*</span></label>
     <input
       id="email"
       name="email"
       type="email"
+      required
       placeholder={m.form_email_placeholder()}
       bind:value={$form.email}
       aria-invalid={!!$errors.email}
@@ -119,11 +128,12 @@
 
   <div class="form-row">
     <div class="form-group">
-      <label for="birth_date">{m.form_birth_date_label()}</label>
+      <label for="birth_date">{m.form_birth_date_label()} <span class="required">*</span></label>
       <input
         id="birth_date"
         name="birth_date"
         type="text"
+        required
         placeholder={m.form_birth_date_placeholder()}
         bind:value={$form.birth_date}
         aria-invalid={!!$errors.birth_date}
@@ -203,7 +213,7 @@
   {/if}
 
   <div class="form-submit-row">
-    <button type="submit" class="form-submit" disabled={$submitting}>
+    <button type="submit" class="form-submit" disabled={$submitting || !canSubmit}>
       {m.form_submit_order_insoles()}
     </button>
   </div>
@@ -278,11 +288,17 @@
     margin: 0;
   }
 
+  .required {
+    color: var(--color-error, #e74c3c);
+    font-weight: 700;
+  }
+
   input,
   select,
   textarea {
     font-family: var(--font-family);
     font-size: var(--font-size-regular);
+    line-height: 1.5;
     color: var(--color-text-content);
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -291,6 +307,20 @@
     box-sizing: border-box;
     transition: border-color 0.15s ease;
     background-color: white;
+  }
+
+  /* UA stylesheets add their own chrome to <select> (Safari ~4px taller
+     than <input> at the same padding). Strip the native appearance and
+     paint a custom caret so select height matches inputs. */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image:
+      url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3e%3cpath fill='none' stroke='%23555' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5l5 5 5-5'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 0.75rem auto;
+    padding-right: 2.25rem;
   }
 
   input:focus,

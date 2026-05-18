@@ -9,3 +9,8 @@ export interface PricingRow {
   prijs: string;
   prijsRaw: number;
 }
+
+export interface OrderPairPricing {
+  extraPair: string;
+  workShoes: string;
+}
