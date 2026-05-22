@@ -16,6 +16,10 @@ export function translateFormError(code: string | undefined): string {
       return m.validation_phone_required_for_callback();
     case 'birth_date_invalid':
       return m.validation_birth_date_invalid();
+    case 'birth_date_unreal':
+      return m.validation_birth_date_unreal();
+    case 'birth_date_out_of_range':
+      return m.validation_birth_date_out_of_range({ min: 4, max: 120 });
     case 'cap_required':
       return m.validation_cap_required();
     case 'quantity_invalid':

@@ -8,6 +8,7 @@
   import type { ContactFormData } from '$lib/forms/contact-schema.js';
   import type { FormFailureData } from '$lib/forms/action-results.js';
   import { translateFirstError } from '$lib/forms/error-messages.js';
+  import { localizedValidity } from '$lib/forms/localized-validity.js';
   import { toast } from '$lib/stores/toast.svelte.js';
   import * as m from '$lib/paraglide/messages.js';
 
@@ -36,8 +37,14 @@
   });
 
   const apiEndpoint = env.PUBLIC_CAP_API_ENDPOINT ?? '';
+  const capEnabled = (env.PUBLIC_CAP_ENABLED ?? '').toLowerCase() === 'true';
+  // See OrderInsolesForm for the rationale — gate the widget on both
+  // PUBLIC_CAP_ENABLED and a configured endpoint so dev/staging (where
+  // CAP_ENABLED=false on the server) doesn't trap the user on a widget
+  // that can never solve.
+  const showCapWidget = capEnabled && !!apiEndpoint;
 
-  if (!apiEndpoint && !$form.capToken) {
+  if (!showCapWidget && !$form.capToken) {
     $form.capToken = 'disabled';
   }
 
@@ -50,7 +57,7 @@
   let capWidget: HTMLElement | undefined = $state();
 
   onMount(() => {
-    if (!capWidget) return;
+    if (!capWidget || !showCapWidget) return;
     void import('$lib/cap-widget-loader.js').then((m) => m.loadCapWidget());
     const onSolve = (e: Event) => {
       const detail = (e as CustomEvent<{ token: string }>).detail;
@@ -80,6 +87,7 @@
         bind:value={$form.name}
         aria-invalid={!!$errors.name}
         required
+        use:localizedValidity={{ valueMissing: m.validation_required() }}
       />
       {#if $errors.name}
         <p class="form-error">{translateFirstError($errors.name)}</p>
@@ -96,6 +104,7 @@
         bind:value={$form.last_name}
         aria-invalid={!!$errors.last_name}
         required
+        use:localizedValidity={{ valueMissing: m.validation_required() }}
       />
       {#if $errors.last_name}
         <p class="form-error">{translateFirstError($errors.last_name)}</p>
@@ -127,6 +136,10 @@
         aria-invalid={!!$errors.phone}
         title={m.form_phone_tooltip()}
         required
+        use:localizedValidity={{
+          valueMissing: m.validation_required(),
+          patternMismatch: m.validation_phone_invalid(),
+        }}
       />
       {#if $errors.phone}
         <p class="form-error">{translateFirstError($errors.phone)}</p>
@@ -144,6 +157,10 @@
         aria-invalid={!!$errors.email}
         title={m.form_email_tooltip()}
         required
+        use:localizedValidity={{
+          valueMissing: m.validation_required(),
+          typeMismatch: m.validation_email_invalid(),
+        }}
       />
       {#if $errors.email}
         <p class="form-error">{translateFirstError($errors.email)}</p>
@@ -183,6 +200,7 @@
       rows={5}
       maxlength={2000}
       required
+      use:localizedValidity={{ valueMissing: m.validation_required() }}
     ></textarea>
     {#if $errors.description}
       <p class="form-error">{translateFirstError($errors.description)}</p>
@@ -190,7 +208,7 @@
   </div>
 
   <div class="form-cap-submit-row">
-    {#if apiEndpoint}
+    {#if showCapWidget}
       <div class="form-group form-cap-group">
         <p class="form-label">{m.form_cap_label()}</p>
         <cap-widget bind:this={capWidget} data-cap-api-endpoint={apiEndpoint}></cap-widget>

@@ -49,6 +49,8 @@
   "validation_email_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
   "validation_phone_invalid": "Bitte geben Sie eine gültige Telefonnummer ein (10 Ziffern)",
   "validation_birth_date_invalid": "Bitte geben Sie ein gültiges Geburtsdatum ein (TT-MM-JJJJ)",
+  "validation_birth_date_unreal": "Dieses Datum existiert nicht — bitte Tag, Monat und Jahr prüfen.",
+  "validation_birth_date_out_of_range": "Bitte ein Geburtsdatum zwischen {min} und {max} Jahren eingeben.",
   "validation_max_length": "Maximal {max} Zeichen erlaubt",
   "validation_min_length": "Mindestens {min} Zeichen erforderlich",
   "validation_phone_required_for_callback": "Telefonnummer ist erforderlich für Rückruf",

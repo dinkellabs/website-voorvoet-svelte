@@ -136,4 +136,49 @@ test.describe('Order insoles form', () => {
     expect(page.url()).toContain('/nl/zolen-bestellen');
     await expect(page.locator('.toast', { hasText: 'Bedankt voor je bestelling' })).toHaveCount(0);
   });
+
+  test('browser-native required popup uses the localized NL message', async ({ page }) => {
+    await page.goto('/nl/zolen-bestellen');
+    await page.waitForSelector('form.order-form');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
+    // Trigger HTML5 validation on the empty first_name input — the
+    // localizedValidity action runs inside the `invalid` event handler
+    // and replaces the browser's English default with the NL string.
+    const message = await page.evaluate(() => {
+      const input = document.getElementById('first_name') as HTMLInputElement;
+      input.value = '';
+      input.checkValidity();
+      return input.validationMessage;
+    });
+    expect(message).toBe('Dit veld is verplicht');
+  });
+
+  test('impossible date (45-05-1982) is rejected with the unreal-date message', async ({
+    page,
+  }) => {
+    await page.goto('/nl/zolen-bestellen');
+    await page.waitForSelector('form.order-form');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
+    await page.fill('#first_name', 'Test');
+    await page.fill('#last_name', 'Person');
+    await page.fill('#email', 'test@example.nl');
+    await page.fill('#birth_date', '45-05-1982');
+    await page.selectOption('#quantity', '1');
+
+    await page.click('button[type="submit"]');
+
+    // Inline error for birth_date must appear with the new "this date
+    // doesn't exist" copy — NOT the generic format hint.
+    const birthDateGroup = page.locator('label[for="birth_date"]').locator('..');
+    await expect(birthDateGroup.locator('.form-error')).toContainText(
+      'Deze datum bestaat niet',
+      { timeout: 5_000 },
+    );
+    // No success toast — submission must have been blocked.
+    await expect(page.locator('.toast', { hasText: 'Bedankt voor je bestelling' })).toHaveCount(0);
+  });
 });
