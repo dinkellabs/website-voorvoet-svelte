@@ -7,6 +7,7 @@
   import { contactSchema, REQUEST_TYPES } from '$lib/forms/contact-schema.js';
   import type { ContactFormData } from '$lib/forms/contact-schema.js';
   import type { FormFailureData } from '$lib/forms/action-results.js';
+  import { capWidgetI18nProps } from '$lib/forms/cap-widget-i18n.js';
   import { translateFirstError } from '$lib/forms/error-messages.js';
   import { localizedValidity } from '$lib/forms/localized-validity.js';
   import { toast } from '$lib/stores/toast.svelte.js';
@@ -211,7 +212,11 @@
     {#if showCapWidget}
       <div class="form-group form-cap-group">
         <p class="form-label">{m.form_cap_label()}</p>
-        <cap-widget bind:this={capWidget} data-cap-api-endpoint={apiEndpoint}></cap-widget>
+        <cap-widget
+          bind:this={capWidget}
+          data-cap-api-endpoint={apiEndpoint}
+          {...capWidgetI18nProps()}
+        ></cap-widget>
         <input type="hidden" name="capToken" bind:value={$form.capToken} />
         {#if $errors.capToken}
           <p class="form-error">{translateFirstError($errors.capToken)}</p>
