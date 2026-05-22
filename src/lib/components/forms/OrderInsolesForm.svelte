@@ -17,8 +17,13 @@
 
   let { data }: Props = $props();
 
-  const { form, errors, enhance, submitting } = superForm(data, {
+  let submitAttempted = $state(false);
+
+  const { form, errors, enhance, submitting, allErrors } = superForm(data, {
     validators: zodClient(orderSchema),
+    onSubmit() {
+      submitAttempted = true;
+    },
     onResult({ result }) {
       if (result.type === 'success') {
         toast.show({ kind: 'success', message: m.toast_order_success() });
@@ -67,11 +72,12 @@
     'Zolen voor werkschoenen': m.form_insole_type_work(),
   };
 
-  // Gate submit on the actual schema so the button reflects real
-  // validity (email format, birth-date pattern, …) instead of just
-  // field presence. Zod is the single source of truth — manual checks
-  // would silently drift if a field rule changes.
-  const canSubmit = $derived(orderSchema.safeParse($form).success);
+  // Show a one-line "form isn't complete" hint after a failed submit
+  // attempt. The button itself stays enabled — earlier we gated it on
+  // a hidden safeParse, which made the page look broken to users who
+  // missed a radio or used an unsupported date separator. Inline
+  // $errors and HTML5 `required` still surface per-field problems.
+  const showErrorSummary = $derived(submitAttempted && $allErrors.length > 0);
 </script>
 
 <form method="POST" use:enhance class="order-form">
@@ -212,8 +218,14 @@
     <input type="hidden" name="capToken" value="disabled" />
   {/if}
 
+  {#if showErrorSummary}
+    <p class="form-summary form-summary--error" role="alert" aria-live="polite">
+      {m.form_errors_summary()}
+    </p>
+  {/if}
+
   <div class="form-submit-row">
-    <button type="submit" class="form-submit" disabled={$submitting || !canSubmit}>
+    <button type="submit" class="form-submit" disabled={$submitting}>
       {m.form_submit_order_insoles()}
     </button>
   </div>
@@ -343,6 +355,15 @@
   .form-error {
     color: var(--color-error, #e74c3c);
     font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .form-summary--error {
+    color: var(--color-error, #e74c3c);
+    background-color: rgba(231, 76, 60, 0.08);
+    border-left: 3px solid var(--color-error, #e74c3c);
+    padding: 0.5rem 0.75rem;
+    font-size: var(--font-size-regular);
     margin: 0;
   }
 

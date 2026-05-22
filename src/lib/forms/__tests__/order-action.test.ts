@@ -72,7 +72,6 @@ const validFields = {
   first_name: 'Anna',
   last_name: 'Smit',
   email: 'anna@example.nl',
-  phone: '0612345678',
   birth_date: '15-06-1990',
   insole_type: 'Dagelijkse zolen',
   quantity: '2',

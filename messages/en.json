@@ -55,6 +55,7 @@
   "validation_cap_required": "Verification is required",
   "validation_quantity_invalid": "Choose a quantity between 1 and 3",
   "validation_generic": "Please fill in this field correctly",
+  "form_errors_summary": "The form isn't complete yet — please review the highlighted fields above.",
   "footer_location_eeftinksweg": "Location Eeftinksweg",
   "footer_location_beethovenlaan": "Location Beethovenlaan",
   "footer_monday": "Monday",
