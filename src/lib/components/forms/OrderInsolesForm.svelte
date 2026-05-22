@@ -222,7 +222,6 @@
 
   {#if showCapWidget}
     <div class="form-group">
-      <p class="form-label">{m.form_cap_label()}</p>
       <cap-widget
         bind:this={capWidget}
         data-cap-api-endpoint={apiEndpoint}

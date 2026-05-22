@@ -19,8 +19,13 @@
 
   let { data }: Props = $props();
 
-  const { form, errors, enhance, submitting } = superForm(data, {
+  let submitAttempted = $state(false);
+
+  const { form, errors, enhance, submitting, allErrors } = superForm(data, {
     validators: zodClient(contactSchema),
+    onSubmit() {
+      submitAttempted = true;
+    },
     onResult({ result }) {
       if (result.type === 'success') {
         toast.show({ kind: 'success', message: m.toast_contact_success() });
@@ -49,11 +54,10 @@
     $form.capToken = 'disabled';
   }
 
-  // Gate submit on the actual schema so the button reflects real
-  // validity (email format, phone format, "Bel mij terug" requires
-  // phone via superRefine, …) instead of merely "not currently
-  // submitting". Zod stays the single source of truth.
-  const canSubmit = $derived(contactSchema.safeParse($form).success);
+  // Show a one-line "form isn't complete" hint after a failed submit
+  // attempt instead of silently disabling the button. Matches the order
+  // form's UX (see OrderInsolesForm for the rationale).
+  const showErrorSummary = $derived(submitAttempted && $allErrors.length > 0);
 
   let capWidget: HTMLElement | undefined = $state();
 
@@ -208,10 +212,15 @@
     {/if}
   </div>
 
+  {#if showErrorSummary}
+    <p class="form-summary form-summary--error" role="alert" aria-live="polite">
+      {m.form_errors_summary()}
+    </p>
+  {/if}
+
   <div class="form-cap-submit-row">
     {#if showCapWidget}
       <div class="form-group form-cap-group">
-        <p class="form-label">{m.form_cap_label()}</p>
         <cap-widget
           bind:this={capWidget}
           data-cap-api-endpoint={apiEndpoint}
@@ -228,7 +237,7 @@
       </div>
     {/if}
     <div class="form-submit-wrap">
-      <button type="submit" class="form-submit" disabled={$submitting || !canSubmit}>
+      <button type="submit" class="form-submit" disabled={$submitting}>
         {m.form_submit_contact()}
       </button>
     </div>
@@ -340,6 +349,15 @@
   .form-error {
     color: var(--color-error, #e74c3c);
     font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .form-summary--error {
+    color: var(--color-error, #e74c3c);
+    background-color: rgba(231, 76, 60, 0.08);
+    border-left: 3px solid var(--color-error, #e74c3c);
+    padding: 0.5rem 0.75rem;
+    font-size: var(--font-size-regular);
     margin: 0;
   }
 
