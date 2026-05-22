@@ -7,7 +7,9 @@
   import { contactSchema, REQUEST_TYPES } from '$lib/forms/contact-schema.js';
   import type { ContactFormData } from '$lib/forms/contact-schema.js';
   import type { FormFailureData } from '$lib/forms/action-results.js';
+  import { capWidgetI18nProps } from '$lib/forms/cap-widget-i18n.js';
   import { translateFirstError } from '$lib/forms/error-messages.js';
+  import { localizedValidity } from '$lib/forms/localized-validity.js';
   import { toast } from '$lib/stores/toast.svelte.js';
   import * as m from '$lib/paraglide/messages.js';
 
@@ -17,8 +19,13 @@
 
   let { data }: Props = $props();
 
-  const { form, errors, enhance, submitting } = superForm(data, {
+  let submitAttempted = $state(false);
+
+  const { form, errors, enhance, submitting, allErrors } = superForm(data, {
     validators: zodClient(contactSchema),
+    onSubmit() {
+      submitAttempted = true;
+    },
     onResult({ result }) {
       if (result.type === 'success') {
         toast.show({ kind: 'success', message: m.toast_contact_success() });
@@ -36,21 +43,26 @@
   });
 
   const apiEndpoint = env.PUBLIC_CAP_API_ENDPOINT ?? '';
+  const capEnabled = (env.PUBLIC_CAP_ENABLED ?? '').toLowerCase() === 'true';
+  // See OrderInsolesForm for the rationale — gate the widget on both
+  // PUBLIC_CAP_ENABLED and a configured endpoint so dev/staging (where
+  // CAP_ENABLED=false on the server) doesn't trap the user on a widget
+  // that can never solve.
+  const showCapWidget = capEnabled && !!apiEndpoint;
 
-  if (!apiEndpoint && !$form.capToken) {
+  if (!showCapWidget && !$form.capToken) {
     $form.capToken = 'disabled';
   }
 
-  // Gate submit on the actual schema so the button reflects real
-  // validity (email format, phone format, "Bel mij terug" requires
-  // phone via superRefine, …) instead of merely "not currently
-  // submitting". Zod stays the single source of truth.
-  const canSubmit = $derived(contactSchema.safeParse($form).success);
+  // Show a one-line "form isn't complete" hint after a failed submit
+  // attempt instead of silently disabling the button. Matches the order
+  // form's UX (see OrderInsolesForm for the rationale).
+  const showErrorSummary = $derived(submitAttempted && $allErrors.length > 0);
 
   let capWidget: HTMLElement | undefined = $state();
 
   onMount(() => {
-    if (!capWidget) return;
+    if (!capWidget || !showCapWidget) return;
     void import('$lib/cap-widget-loader.js').then((m) => m.loadCapWidget());
     const onSolve = (e: Event) => {
       const detail = (e as CustomEvent<{ token: string }>).detail;
@@ -80,6 +92,7 @@
         bind:value={$form.name}
         aria-invalid={!!$errors.name}
         required
+        use:localizedValidity={{ valueMissing: m.validation_required() }}
       />
       {#if $errors.name}
         <p class="form-error">{translateFirstError($errors.name)}</p>
@@ -96,6 +109,7 @@
         bind:value={$form.last_name}
         aria-invalid={!!$errors.last_name}
         required
+        use:localizedValidity={{ valueMissing: m.validation_required() }}
       />
       {#if $errors.last_name}
         <p class="form-error">{translateFirstError($errors.last_name)}</p>
@@ -127,6 +141,10 @@
         aria-invalid={!!$errors.phone}
         title={m.form_phone_tooltip()}
         required
+        use:localizedValidity={{
+          valueMissing: m.validation_required(),
+          patternMismatch: m.validation_phone_invalid(),
+        }}
       />
       {#if $errors.phone}
         <p class="form-error">{translateFirstError($errors.phone)}</p>
@@ -144,6 +162,10 @@
         aria-invalid={!!$errors.email}
         title={m.form_email_tooltip()}
         required
+        use:localizedValidity={{
+          valueMissing: m.validation_required(),
+          typeMismatch: m.validation_email_invalid(),
+        }}
       />
       {#if $errors.email}
         <p class="form-error">{translateFirstError($errors.email)}</p>
@@ -183,17 +205,28 @@
       rows={5}
       maxlength={2000}
       required
+      use:localizedValidity={{ valueMissing: m.validation_required() }}
     ></textarea>
     {#if $errors.description}
       <p class="form-error">{translateFirstError($errors.description)}</p>
     {/if}
   </div>
 
+  {#if showErrorSummary}
+    <p class="form-summary form-summary--error" role="alert" aria-live="polite">
+      {m.form_errors_summary()}
+    </p>
+  {/if}
+
   <div class="form-cap-submit-row">
-    {#if apiEndpoint}
+    {#if showCapWidget}
       <div class="form-group form-cap-group">
-        <p class="form-label">{m.form_cap_label()}</p>
-        <cap-widget bind:this={capWidget} data-cap-api-endpoint={apiEndpoint}></cap-widget>
+        <cap-widget
+          bind:this={capWidget}
+          data-cap-api-endpoint={apiEndpoint}
+          {...capWidgetI18nProps()}
+          style="--cap-widget-height:43px;--cap-widget-padding:8px 12px;--cap-checkbox-size:18px;--cap-gap:10px;--cap-border-radius:4px;--cap-background:white;--cap-border-color:#ccc;--cap-checkbox-border-radius:2px;--cap-checkbox-border:1px solid #ccc;"
+        ></cap-widget>
         <input type="hidden" name="capToken" bind:value={$form.capToken} />
         {#if $errors.capToken}
           <p class="form-error">{translateFirstError($errors.capToken)}</p>
@@ -205,7 +238,7 @@
       </div>
     {/if}
     <div class="form-submit-wrap">
-      <button type="submit" class="form-submit" disabled={$submitting || !canSubmit}>
+      <button type="submit" class="form-submit" disabled={$submitting}>
         {m.form_submit_contact()}
       </button>
     </div>
@@ -320,10 +353,19 @@
     margin: 0;
   }
 
+  .form-summary--error {
+    color: var(--color-error, #e74c3c);
+    background-color: rgba(231, 76, 60, 0.08);
+    border-left: 3px solid var(--color-error, #e74c3c);
+    padding: 0.5rem 0.75rem;
+    font-size: var(--font-size-regular);
+    margin: 0;
+  }
+
   .form-cap-submit-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     gap: 1rem;
     flex-direction: column;
   }
@@ -340,7 +382,7 @@
 
   .form-submit-wrap {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     flex-shrink: 0;
   }
 

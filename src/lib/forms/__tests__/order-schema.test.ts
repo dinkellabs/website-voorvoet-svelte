@@ -60,6 +60,47 @@ describe('orderSchema', () => {
     expect(orderSchema.safeParse({ ...validBase, birth_date: '' }).success).toBe(false);
   });
 
+  it('rejects impossible days/months with the birth_date_unreal code', () => {
+    // The pre-fix regex (`/^\d{2}-\d{2}-\d{4}$/`) would accept all of these.
+    for (const input of ['45-05-1982', '30-02-1990', '31-04-1990', '00-01-1990', '15-13-1990']) {
+      const result = orderSchema.safeParse({ ...validBase, birth_date: input });
+      expect(result.success, `expected ${input} to be rejected`).toBe(false);
+      if (!result.success) {
+        const codes = result.error.issues.map((i) => i.message);
+        expect(codes, `expected ${input} -> birth_date_unreal`).toContain('birth_date_unreal');
+      }
+    }
+  });
+
+  it('accepts leap-day in a leap year and rejects it in a non-leap year', () => {
+    expect(orderSchema.safeParse({ ...validBase, birth_date: '29-02-2000' }).success).toBe(true);
+    const nonLeap = orderSchema.safeParse({ ...validBase, birth_date: '29-02-2001' });
+    expect(nonLeap.success).toBe(false);
+    if (!nonLeap.success) {
+      expect(nonLeap.error.issues.map((i) => i.message)).toContain('birth_date_unreal');
+    }
+  });
+
+  it('rejects birth dates outside the 4–120 year age range', () => {
+    // Yesterday → age 0 → fails min
+    const today = new Date();
+    const tooYoung = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+    const tooYoungStr = `${String(tooYoung.getDate()).padStart(2, '0')}-${String(tooYoung.getMonth() + 1).padStart(2, '0')}-${tooYoung.getFullYear()}`;
+    const young = orderSchema.safeParse({ ...validBase, birth_date: tooYoungStr });
+    expect(young.success).toBe(false);
+    if (!young.success) {
+      expect(young.error.issues.map((i) => i.message)).toContain('birth_date_out_of_range');
+    }
+
+    // 150 years ago → fails max
+    const tooOld = `01-01-${today.getFullYear() - 150}`;
+    const old = orderSchema.safeParse({ ...validBase, birth_date: tooOld });
+    expect(old.success).toBe(false);
+    if (!old.success) {
+      expect(old.error.issues.map((i) => i.message)).toContain('birth_date_out_of_range');
+    }
+  });
+
   it('accepts canonical birth_date DD-MM-YYYY', () => {
     expect(orderSchema.safeParse({ ...validBase, birth_date: '31-12-1999' }).success).toBe(true);
   });

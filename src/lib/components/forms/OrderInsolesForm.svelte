@@ -7,7 +7,9 @@
   import { orderSchema, INSOLE_TYPES } from '$lib/forms/order-schema.js';
   import type { OrderFormData } from '$lib/forms/order-schema.js';
   import type { FormFailureData } from '$lib/forms/action-results.js';
+  import { capWidgetI18nProps } from '$lib/forms/cap-widget-i18n.js';
   import { translateFirstError } from '$lib/forms/error-messages.js';
+  import { localizedValidity } from '$lib/forms/localized-validity.js';
   import { toast } from '$lib/stores/toast.svelte.js';
   import * as m from '$lib/paraglide/messages.js';
 
@@ -41,15 +43,21 @@
   });
 
   const apiEndpoint = env.PUBLIC_CAP_API_ENDPOINT ?? '';
+  const capEnabled = (env.PUBLIC_CAP_ENABLED ?? '').toLowerCase() === 'true';
+  // Render the widget only when the server is configured to enforce Cap.
+  // On dev (PUBLIC_CAP_ENABLED=false), rendering a widget that points at a
+  // server with CAP_ENABLED=false would 404 /api/cap/challenge and trap the
+  // user on a permanent "Error. Try again." → "Verificatie is vereist".
+  const showCapWidget = capEnabled && !!apiEndpoint;
 
-  if (!apiEndpoint && !$form.capToken) {
+  if (!showCapWidget && !$form.capToken) {
     $form.capToken = 'disabled';
   }
 
   let capWidget: HTMLElement | undefined = $state();
 
   onMount(() => {
-    if (!capWidget) return;
+    if (!capWidget || !showCapWidget) return;
     void import('$lib/cap-widget-loader.js').then((m) => m.loadCapWidget());
     const onSolve = (e: Event) => {
       const detail = (e as CustomEvent<{ token: string }>).detail;
@@ -92,6 +100,7 @@
         placeholder={m.form_first_name_placeholder()}
         bind:value={$form.first_name}
         aria-invalid={!!$errors.first_name}
+        use:localizedValidity={{ valueMissing: m.validation_required() }}
       />
       {#if $errors.first_name}
         <p class="form-error">{translateFirstError($errors.first_name)}</p>
@@ -108,6 +117,7 @@
         placeholder={m.form_last_name_placeholder()}
         bind:value={$form.last_name}
         aria-invalid={!!$errors.last_name}
+        use:localizedValidity={{ valueMissing: m.validation_required() }}
       />
       {#if $errors.last_name}
         <p class="form-error">{translateFirstError($errors.last_name)}</p>
@@ -126,6 +136,10 @@
       bind:value={$form.email}
       aria-invalid={!!$errors.email}
       title={m.form_email_tooltip_order()}
+      use:localizedValidity={{
+        valueMissing: m.validation_required(),
+        typeMismatch: m.validation_email_invalid(),
+      }}
     />
     {#if $errors.email}
       <p class="form-error">{translateFirstError($errors.email)}</p>
@@ -144,6 +158,7 @@
         bind:value={$form.birth_date}
         aria-invalid={!!$errors.birth_date}
         title={m.form_birth_date_tooltip()}
+        use:localizedValidity={{ valueMissing: m.validation_required() }}
       />
       {#if $errors.birth_date}
         <p class="form-error">{translateFirstError($errors.birth_date)}</p>
@@ -205,29 +220,36 @@
     {/if}
   </div>
 
-  {#if apiEndpoint}
-    <div class="form-group">
-      <p class="form-label">{m.form_cap_label()}</p>
-      <cap-widget bind:this={capWidget} data-cap-api-endpoint={apiEndpoint}></cap-widget>
-      <input type="hidden" name="capToken" bind:value={$form.capToken} />
-      {#if $errors.capToken}
-        <p class="form-error">{translateFirstError($errors.capToken)}</p>
-      {/if}
-    </div>
-  {:else}
-    <input type="hidden" name="capToken" value="disabled" />
-  {/if}
-
   {#if showErrorSummary}
     <p class="form-summary form-summary--error" role="alert" aria-live="polite">
       {m.form_errors_summary()}
     </p>
   {/if}
 
-  <div class="form-submit-row">
-    <button type="submit" class="form-submit" disabled={$submitting}>
-      {m.form_submit_order_insoles()}
-    </button>
+  <div class="form-cap-submit-row">
+    {#if showCapWidget}
+      <div class="form-group form-cap-group">
+        <cap-widget
+          bind:this={capWidget}
+          data-cap-api-endpoint={apiEndpoint}
+          {...capWidgetI18nProps()}
+          style="--cap-widget-height:43px;--cap-widget-padding:8px 12px;--cap-checkbox-size:18px;--cap-gap:10px;--cap-border-radius:4px;--cap-background:white;--cap-border-color:#ccc;--cap-checkbox-border-radius:2px;--cap-checkbox-border:1px solid #ccc;"
+        ></cap-widget>
+        <input type="hidden" name="capToken" bind:value={$form.capToken} />
+        {#if $errors.capToken}
+          <p class="form-error">{translateFirstError($errors.capToken)}</p>
+        {/if}
+      </div>
+    {:else}
+      <div class="form-cap-group">
+        <input type="hidden" name="capToken" value="disabled" />
+      </div>
+    {/if}
+    <div class="form-submit-wrap">
+      <button type="submit" class="form-submit" disabled={$submitting}>
+        {m.form_submit_order_insoles()}
+      </button>
+    </div>
   </div>
 </form>
 
@@ -367,9 +389,28 @@
     margin: 0;
   }
 
-  .form-submit-row {
+  .form-cap-submit-row {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-direction: column;
+  }
+
+  @media (min-width: 768px) {
+    .form-cap-submit-row {
+      flex-direction: row;
+    }
+  }
+
+  .form-cap-group {
+    flex: 1;
+  }
+
+  .form-submit-wrap {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
   }
 
   .form-submit {
