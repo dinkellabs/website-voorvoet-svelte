@@ -233,7 +233,7 @@
           bind:this={capWidget}
           data-cap-api-endpoint={apiEndpoint}
           {...capWidgetI18nProps()}
-          style="--cap-border-radius:4px;--cap-background:white;--cap-border-color:#ccc;--cap-checkbox-border-radius:2px;--cap-checkbox-border:1px solid #ccc;"
+          style="--cap-widget-height:43px;--cap-widget-padding:8px 12px;--cap-checkbox-size:18px;--cap-gap:10px;--cap-border-radius:4px;--cap-background:white;--cap-border-color:#ccc;--cap-checkbox-border-radius:2px;--cap-checkbox-border:1px solid #ccc;"
         ></cap-widget>
         <input type="hidden" name="capToken" bind:value={$form.capToken} />
         {#if $errors.capToken}
@@ -392,7 +392,7 @@
   .form-cap-submit-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     gap: 1rem;
     flex-direction: column;
   }
@@ -409,7 +409,7 @@
 
   .form-submit-wrap {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     flex-shrink: 0;
   }
 
