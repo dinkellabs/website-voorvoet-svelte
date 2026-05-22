@@ -32,3 +32,28 @@ jobs:
           echo "::error::PRs into main must originate from the 'dev' branch. This PR's head is '$HEAD_REF'."
           echo "Promote your changes through dev first, then open a dev → main PR."
           exit 1
+
+  version-bumped:
+    # docker-publish on main fast-fails if VERSION already exists in GHCR.
+    # Catch that pre-merge so we don't have to chase a follow-up bump PR.
+    name: VERSION must be bumped
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Fetch base ref
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git fetch --depth=1 origin "$BASE_REF"
+      - name: Compare VERSION against base
+        run: |
+          HEAD_VERSION=$(cat VERSION)
+          BASE_VERSION=$(git show "origin/${{ github.base_ref }}:VERSION")
+          echo "head=$HEAD_VERSION base=$BASE_VERSION"
+          if [ "$HEAD_VERSION" = "$BASE_VERSION" ]; then
+            echo "::error::VERSION on this PR ($HEAD_VERSION) matches ${{ github.base_ref }} ($BASE_VERSION). Bump VERSION (and run 'pnpm version:sync') before merging — docker-publish refuses to overwrite an existing GHCR tag."
+            exit 1
+          fi
+          echo "✓ VERSION bumped: $BASE_VERSION → $HEAD_VERSION."
