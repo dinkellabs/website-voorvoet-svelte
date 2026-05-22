@@ -220,32 +220,36 @@
     {/if}
   </div>
 
-  {#if showCapWidget}
-    <div class="form-group">
-      <cap-widget
-        bind:this={capWidget}
-        data-cap-api-endpoint={apiEndpoint}
-        {...capWidgetI18nProps()}
-      ></cap-widget>
-      <input type="hidden" name="capToken" bind:value={$form.capToken} />
-      {#if $errors.capToken}
-        <p class="form-error">{translateFirstError($errors.capToken)}</p>
-      {/if}
-    </div>
-  {:else}
-    <input type="hidden" name="capToken" value="disabled" />
-  {/if}
-
   {#if showErrorSummary}
     <p class="form-summary form-summary--error" role="alert" aria-live="polite">
       {m.form_errors_summary()}
     </p>
   {/if}
 
-  <div class="form-submit-row">
-    <button type="submit" class="form-submit" disabled={$submitting}>
-      {m.form_submit_order_insoles()}
-    </button>
+  <div class="form-cap-submit-row">
+    {#if showCapWidget}
+      <div class="form-group form-cap-group">
+        <cap-widget
+          bind:this={capWidget}
+          data-cap-api-endpoint={apiEndpoint}
+          {...capWidgetI18nProps()}
+          style="--cap-border-radius:4px;--cap-background:white;--cap-border-color:#ccc;--cap-checkbox-border-radius:2px;--cap-checkbox-border:1px solid #ccc;"
+        ></cap-widget>
+        <input type="hidden" name="capToken" bind:value={$form.capToken} />
+        {#if $errors.capToken}
+          <p class="form-error">{translateFirstError($errors.capToken)}</p>
+        {/if}
+      </div>
+    {:else}
+      <div class="form-cap-group">
+        <input type="hidden" name="capToken" value="disabled" />
+      </div>
+    {/if}
+    <div class="form-submit-wrap">
+      <button type="submit" class="form-submit" disabled={$submitting}>
+        {m.form_submit_order_insoles()}
+      </button>
+    </div>
   </div>
 </form>
 
@@ -385,9 +389,28 @@
     margin: 0;
   }
 
-  .form-submit-row {
+  .form-cap-submit-row {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-direction: column;
+  }
+
+  @media (min-width: 768px) {
+    .form-cap-submit-row {
+      flex-direction: row;
+    }
+  }
+
+  .form-cap-group {
+    flex: 1;
+  }
+
+  .form-submit-wrap {
+    display: flex;
+    align-items: flex-end;
+    flex-shrink: 0;
   }
 
   .form-submit {

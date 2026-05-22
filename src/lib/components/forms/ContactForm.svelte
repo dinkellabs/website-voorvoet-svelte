@@ -225,6 +225,7 @@
           bind:this={capWidget}
           data-cap-api-endpoint={apiEndpoint}
           {...capWidgetI18nProps()}
+          style="--cap-border-radius:4px;--cap-background:white;--cap-border-color:#ccc;--cap-checkbox-border-radius:2px;--cap-checkbox-border:1px solid #ccc;"
         ></cap-widget>
         <input type="hidden" name="capToken" bind:value={$form.capToken} />
         {#if $errors.capToken}
