@@ -87,4 +87,53 @@ test.describe('Order insoles form', () => {
     const toast = page.locator('.toast', { hasText: 'Thank you for your order' });
     await expect(toast).toBeVisible({ timeout: 10_000 });
   });
+
+  test('accepts loosened birth_date separators (single-digit + slash)', async ({ page }) => {
+    await page.goto('/nl/zolen-bestellen');
+    await page.waitForSelector('form.order-form');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
+    await page.fill('#first_name', 'Eva');
+    await page.fill('#last_name', 'Visser');
+    await page.fill('#email', 'eva@visser.nl');
+    // Loosened format: single-digit day/month with slashes.
+    await page.fill('#birth_date', '1/1/1985');
+    await page.selectOption('#quantity', '1');
+    // insole_type defaults to "Dagelijkse zolen" — no need to click.
+
+    await page.click('button[type="submit"]');
+
+    const toast = page.locator('.toast', { hasText: 'Bedankt voor je bestelling' });
+    await expect(toast).toBeVisible({ timeout: 10_000 });
+
+    const inbox = await waitForInbox(1);
+    const mail = inbox.find((m) => m.subject.includes('Eva Visser'));
+    expect(mail).toBeTruthy();
+    // Normalised in the order email regardless of separator chosen by the user.
+    expect(mail!.text).toContain('01-01-1985');
+  });
+
+  test('empty submit shows the form-errors summary and stays on the page', async ({ page }) => {
+    await page.goto('/nl/zolen-bestellen');
+    await page.waitForSelector('form.order-form');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
+    // Strip HTML5 `required` attrs so the click reaches the JS submit
+    // handler — we want to verify the JS-level error feedback, not the
+    // browser-native one (which we already get for free).
+    await page.evaluate(() => {
+      document.querySelectorAll('[required]').forEach((el) => el.removeAttribute('required'));
+    });
+
+    await page.click('button[type="submit"]');
+
+    const summary = page.locator('.form-summary--error');
+    await expect(summary).toBeVisible({ timeout: 5_000 });
+
+    // Should not have navigated or shown the success toast.
+    expect(page.url()).toContain('/nl/zolen-bestellen');
+    await expect(page.locator('.toast', { hasText: 'Bedankt voor je bestelling' })).toHaveCount(0);
+  });
 });
