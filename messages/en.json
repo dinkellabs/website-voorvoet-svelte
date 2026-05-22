@@ -49,6 +49,8 @@
   "validation_email_invalid": "Please enter a valid email address",
   "validation_phone_invalid": "Please enter a valid phone number (10 digits)",
   "validation_birth_date_invalid": "Please enter a valid birth date (DD-MM-YYYY)",
+  "validation_birth_date_unreal": "This date doesn't exist — please check the day, month and year.",
+  "validation_birth_date_out_of_range": "Enter a birth date between {min} and {max} years ago.",
   "validation_max_length": "Maximum {max} characters allowed",
   "validation_min_length": "Minimum {min} characters required",
   "validation_phone_required_for_callback": "Phone number is required when you choose 'call me back'",

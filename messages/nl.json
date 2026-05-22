@@ -49,6 +49,8 @@
   "validation_email_invalid": "Vul een geldig e-mailadres in",
   "validation_phone_invalid": "Vul een geldig telefoonnummer in (10 cijfers)",
   "validation_birth_date_invalid": "Vul een geldige geboortedatum in (DD-MM-JJJJ)",
+  "validation_birth_date_unreal": "Deze datum bestaat niet — controleer de dag, maand en jaar.",
+  "validation_birth_date_out_of_range": "Vul een geboortedatum in tussen {min} en {max} jaar geleden.",
   "validation_max_length": "Maximaal {max} tekens toegestaan",
   "validation_min_length": "Minimaal {min} tekens vereist",
   "validation_phone_required_for_callback": "Telefoonnummer is verplicht als u gebeld wilt worden",
