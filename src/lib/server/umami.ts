@@ -1,5 +1,7 @@
 import { env } from '$env/dynamic/private';
+import { building } from '$app/environment';
 import { isbot } from 'isbot';
+import logger from '$lib/server/logger.js';
 
 export type UmamiEvent = {
   name: string;
@@ -12,11 +14,31 @@ export type UmamiEvent = {
   data?: Record<string, string | number | boolean>;
 };
 
+const debugEnabled = (env.UMAMI_DEBUG ?? '').toLowerCase() === 'true';
+
+if (!building) {
+  if (env.UMAMI_API_URL) {
+    if (!env.UMAMI_WEBSITE_ID) {
+      logger.warn(
+        'UMAMI_API_URL is set but UMAMI_WEBSITE_ID is empty — events will be rejected by Umami.',
+      );
+    } else {
+      logger.info(
+        { url: env.UMAMI_API_URL, debug: debugEnabled },
+        'umami tracking enabled (server-side)',
+      );
+    }
+  } else {
+    logger.info('umami tracking disabled (UMAMI_API_URL not set)');
+  }
+}
+
 /**
  * Sends an event to the Umami analytics API.
  *
  * Silent no-op when UMAMI_API_URL is unset.
  * Bot user agents are filtered; never throws to caller.
+ * Set UMAMI_DEBUG=true to log every POST response status.
  *
  * @param event - The analytics event to track
  */
@@ -53,14 +75,22 @@ export async function trackEvent(event: UmamiEvent): Promise<void> {
   }
 
   try {
-    await fetch(apiUrl, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
-  } catch {
-    // Fire-and-forget: swallow all errors (timeouts, network failures, etc.)
+    if (debugEnabled) {
+      logger.debug(
+        { name: event.name, url: event.url, status: response.status, ok: response.ok },
+        'umami event posted',
+      );
+    }
+  } catch (err) {
+    if (debugEnabled) {
+      logger.debug({ name: event.name, url: event.url, err }, 'umami event post failed');
+    }
   } finally {
     clearTimeout(timer);
   }

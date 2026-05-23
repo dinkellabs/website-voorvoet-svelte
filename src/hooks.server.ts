@@ -36,6 +36,15 @@ const LEGACY_REDIRECTS: Record<string, string> = {
 
 const SKIP_TRACKING_PREFIXES = ['/health', '/sitemap.xml', '/robots.txt', '/csp-report'];
 
+function safeReferrerHost(referrer: string | undefined): string {
+  if (!referrer) return '';
+  try {
+    return new URL(referrer).hostname;
+  } catch {
+    return '';
+  }
+}
+
 // ─── Boot-time guards ────────────────────────────────────────────────────────
 
 // Same hostname-based gate as cap.ts (see comment there). Duplicated rather
@@ -76,7 +85,9 @@ function appendUmamiToCsp(existing: string): string {
   if (!umamiScriptOrigin && !umamiApiOrigin) return existing;
 
   const scriptAdditions = umamiScriptOrigin ? ` ${umamiScriptOrigin}` : '';
-  const connectAdditions = [umamiScriptOrigin, umamiApiOrigin].filter(Boolean).join(' ');
+  const connectAdditions = [...new Set([umamiScriptOrigin, umamiApiOrigin].filter(Boolean))].join(
+    ' ',
+  );
 
   let updated = existing;
   if (scriptAdditions) {
@@ -111,6 +122,21 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   const legacyTarget = LEGACY_REDIRECTS[pathname];
   if (legacyTarget) {
+    if (env.UMAMI_API_URL && !pubEnv.PUBLIC_UMAMI_SCRIPT_URL) {
+      const userAgent = event.request.headers.get('user-agent') ?? '';
+      const referrer = event.request.headers.get('referer') ?? undefined;
+      const referrerHost = safeReferrerHost(referrer);
+      void trackEvent({
+        name: 'legacy_redirect',
+        url: pathname,
+        hostname: event.url.hostname,
+        language: 'nl',
+        referrer,
+        userAgent,
+        ip: event.getClientAddress(),
+        data: { from_path: pathname, to_path: legacyTarget, referrer_host: referrerHost },
+      }).catch(() => {});
+    }
     throw redirect(308, legacyTarget);
   }
 
@@ -179,6 +205,32 @@ export const handle: Handle = async ({ event, resolve }) => {
         referrer,
         userAgent,
         ip,
+      }).catch(() => {});
+    }
+  }
+
+  // 404 tracking: capture broken links and crawl errors. Skipped when the
+  // client-side script is active (it tracks 404s separately) and for the
+  // skip-prefix routes.
+  if (
+    !clientSideUmamiActive &&
+    response.status === 404 &&
+    isHtml &&
+    !SKIP_TRACKING_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  ) {
+    const umamiApiUrl = env.UMAMI_API_URL;
+    if (umamiApiUrl) {
+      const userAgent = event.request.headers.get('user-agent') ?? '';
+      const referrer = event.request.headers.get('referer') ?? undefined;
+      void trackEvent({
+        name: '404',
+        url: pathname,
+        hostname: event.url.hostname,
+        language: lang,
+        referrer,
+        userAgent,
+        ip: event.getClientAddress(),
+        data: { referrer_host: safeReferrerHost(referrer) },
       }).catch(() => {});
     }
   }

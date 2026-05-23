@@ -28,15 +28,32 @@ export const contactAction: Action = async (event) => {
     error(429, 'Too many requests — please wait before submitting again.');
   }
 
+  const userAgent = event.request.headers.get('user-agent') ?? '';
+  const ip = event.getClientAddress();
+
+  const trackFormFailure = (name: string) => {
+    void trackEvent({
+      name,
+      url: event.url.pathname,
+      hostname: event.url.hostname,
+      language: lang,
+      userAgent,
+      ip,
+      data: { form_type: 'contact', lang },
+    }).catch(() => {});
+  };
+
   const form = await superValidate(event.request, zod(contactSchema));
   if (!form.valid) {
     log.info({ path: event.url.pathname }, 'contact form validation failed');
+    trackFormFailure('form_validation_failed');
     return fail(400, { form });
   }
 
   const capOk = await verifyCapToken(form.data.capToken, requestId);
   if (!capOk) {
     log.warn({ path: event.url.pathname }, 'contact form cap failed');
+    trackFormFailure('form_cap_failed');
     return fail(400, { form, code: 'cap_failed' satisfies FormFailureCode });
   }
 
@@ -44,7 +61,8 @@ export const contactAction: Action = async (event) => {
     await sendContactEmail(form.data, requestId);
   } catch (err) {
     log.error({ err, path: event.url.pathname }, 'contact email send failed');
-    return fail(400, { form, code: 'submission_failed' satisfies FormFailureCode });
+    trackFormFailure('form_submit_failed');
+    return fail(502, { form, code: 'submission_failed' satisfies FormFailureCode });
   }
 
   log.info({ path: event.url.pathname }, 'contact form submitted successfully');
@@ -54,8 +72,8 @@ export const contactAction: Action = async (event) => {
     url: event.url.pathname,
     hostname: event.url.hostname,
     language: lang,
-    userAgent: event.request.headers.get('user-agent') ?? '',
-    ip: event.getClientAddress(),
+    userAgent,
+    ip,
   }).catch(() => {});
 
   return { form, success: true };
