@@ -140,6 +140,10 @@
     </div>
 
     <div class="reimb-table-wrap">
+      <!-- tabindex=0 + role=region is the WAI-ARIA APG pattern for making an
+           overflowing scroll container reachable by keyboard. The element is
+           intentionally non-interactive itself. -->
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
       <div class="reimb-table-scroll" tabindex="0" role="region" aria-label={m.reimb_table_title()}>
         <table class="reimb-table">
           <colgroup>
@@ -259,6 +263,7 @@
       <Title level={2} class="pricing-title">{m.reimb_pricing_title()}</Title>
       <p class="pricing-intro">{m.reimb_pricing_intro()}</p>
       <div class="pricing-table-wrap">
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <div
           class="pricing-table-scroll"
           tabindex="0"

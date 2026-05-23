@@ -21,6 +21,10 @@
 
   let submitAttempted = $state(false);
 
+  // `data` is the SSR-rendered initial form state; superForm consumes it
+  // once at hydration and tracks updates internally. Capturing the initial
+  // value here is intentional.
+  // svelte-ignore state_referenced_locally
   const { form, errors, enhance, submitting, allErrors } = superForm(data, {
     validators: zodClient(orderSchema),
     onSubmit() {

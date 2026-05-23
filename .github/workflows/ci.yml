@@ -1,10 +1,14 @@
 name: CI
 
-# Manual only. Pre-commit covers lint/format/type/unit-tests locally,
-# the Dockerfile build itself verifies that the code compiles, and
-# Playwright/Lighthouse here are slow + occasionally flaky. Trigger this
-# from the Actions tab when you want the full sweep (e.g. before a release).
+# Runs on every push to main/dev and on every PR targeting them so
+# lint/format/type/unit-test regressions surface before merge.
+# Playwright + Lighthouse are kept in dependent jobs so they only run after
+# `ci` succeeds and skip on draft PRs to keep iteration cycle short.
 on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
   workflow_dispatch:
 
 jobs:

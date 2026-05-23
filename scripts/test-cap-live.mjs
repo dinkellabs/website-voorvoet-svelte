@@ -202,7 +202,9 @@ async function waitForReady(url, timeoutMs = 30_000) {
     try {
       const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
       if (res.ok || res.status < 500) return;
-    } catch {}
+    } catch {
+      // Server not yet listening — retry until deadline.
+    }
     await new Promise((r) => setTimeout(r, 250));
   }
   throw new Error(`Server at ${url} not ready within ${timeoutMs}ms`);
@@ -214,7 +216,9 @@ async function cleanup() {
   if (smtpServer) await new Promise((r) => smtpServer.close(() => r()));
   try {
     fs.unlinkSync(INBOX_PATH);
-  } catch {}
+  } catch {
+    // Inbox file may not exist on early failures.
+  }
 }
 
 async function run() {

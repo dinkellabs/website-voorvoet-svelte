@@ -51,14 +51,15 @@ module.exports = {
       },
     },
     assert: {
-      // Soft-launch: warn first, promote to `error` once CI runner variance is
-      // characterised. Local dev machines hit these comfortably; GitHub-hosted
-      // runners are slower and noisier — switching to `error` now would flap.
+      // Accessibility and SEO are deterministic enough to fail CI on regressions.
+      // Performance + best-practices are kept as warnings until GitHub-runner
+      // variance is fully characterised (the local-vs-CI throttling delta has
+      // been ±5 points historically).
       assertions: {
         'categories:performance': ['warn', { minScore: 0.95 }],
-        'categories:accessibility': ['warn', { minScore: 0.95 }],
+        'categories:accessibility': ['error', { minScore: 0.95 }],
         'categories:best-practices': ['warn', { minScore: 0.95 }],
-        'categories:seo': ['warn', { minScore: 1.0 }],
+        'categories:seo': ['error', { minScore: 1.0 }],
       },
     },
     upload: {
