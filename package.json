@@ -1,6 +1,6 @@
 {
   "name": "website-voorvoet-svelte",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,9 @@
     "version:sync": "node scripts/sync-version.mjs",
     "version:check": "node scripts/sync-version.mjs --check",
     "prepare": "test -d src/lib/paraglide || pnpm run paraglide:compile",
+    "predev": "pnpm run version:sync",
     "dev": "pnpm run paraglide:compile && vite dev",
+    "prebuild": "pnpm run version:sync",
     "build": "pnpm run paraglide:compile && vite build",
     "preview": "vite preview",
     "lint": "eslint --max-warnings 0 .",

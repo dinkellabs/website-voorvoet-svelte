@@ -1,8 +1,19 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { defineConfig } from 'vite';
 
+const appVersion = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), 'VERSION'),
+  'utf8',
+).trim();
+
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+  },
   plugins: [
     paraglideVitePlugin({
       project: './project.inlang',

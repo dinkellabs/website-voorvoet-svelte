@@ -129,6 +129,8 @@
         </tbody>
       </table>
     </div>
+
+    <p class="credits-version">{m.credits_version_label({ version: __APP_VERSION__ })}</p>
   </Container>
 </Section>
 
@@ -285,5 +287,13 @@
     object-fit: cover;
     border-radius: 4px;
     display: block;
+  }
+
+  .credits-version {
+    margin-top: 2.5rem;
+    font-size: 0.85rem;
+    color: var(--color-text-content);
+    opacity: 0.7;
+    text-align: right;
   }
 </style>
