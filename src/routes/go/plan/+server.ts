@@ -15,8 +15,7 @@ import type { RequestHandler } from './$types.js';
 export const GET: RequestHandler = (event) => {
   const planPortalUrl = env.LINK_PLAN_PORTAL;
   const langParam = event.url.searchParams.get('lang');
-  const lang: 'nl' | 'de' | 'en' =
-    langParam === 'de' || langParam === 'en' ? langParam : 'nl';
+  const lang: 'nl' | 'de' | 'en' = langParam === 'de' || langParam === 'en' ? langParam : 'nl';
 
   const target = planPortalUrl || `${event.url.origin}${routeFor('contact', lang)}`;
 

@@ -6,10 +6,7 @@
   import Title from '$lib/components/Title.svelte';
   import Chevron from '$lib/components/icons/Chevron.svelte';
   import * as m from '$lib/paraglide/messages.js';
-  import type {
-    ReimbursementRow,
-    PricingRow,
-  } from '$lib/data/reimbursements-types.js';
+  import type { ReimbursementRow, PricingRow } from '$lib/data/reimbursements-types.js';
 
   interface Props {
     data: { lang: Lang; reimbursements: ReimbursementRow[]; pricing: PricingRow[] };

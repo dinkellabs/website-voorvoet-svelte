@@ -73,10 +73,7 @@ function tokenKeyFromSubmitted(token: string): string | null {
   return `${id}:${sha256Hex(verToken)}`;
 }
 
-export async function verifyCapToken(
-  token: string,
-  requestId?: string,
-): Promise<boolean> {
+export async function verifyCapToken(token: string, requestId?: string): Promise<boolean> {
   const log = withRequestId(requestId ?? 'no-request-id');
 
   if (!capEnabled) {

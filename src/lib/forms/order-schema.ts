@@ -29,9 +29,7 @@ function isRealCalendarDate(value: string): boolean {
   // `new Date(y, m-1, d)` silently rolls invalid components forward
   // (Feb 30 → Mar 2). Round-trip the components to catch that.
   const date = new Date(year, month - 1, day);
-  return (
-    date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
-  );
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
 }
 
 function isWithinAgeRange(value: string): boolean {
@@ -67,7 +65,12 @@ export const orderSchema = z.object({
         .refine(isWithinAgeRange, 'birth_date_out_of_range'),
     ),
   insole_type: z.enum(INSOLE_TYPES).default('Dagelijkse zolen'),
-  quantity: z.coerce.number().int().min(1, 'quantity_invalid').max(3, 'quantity_invalid').default(1),
+  quantity: z.coerce
+    .number()
+    .int()
+    .min(1, 'quantity_invalid')
+    .max(3, 'quantity_invalid')
+    .default(1),
   notes: z.string().max(1000, 'notes_too_long').optional().default(''),
   capToken: z.string().min(1, 'cap_required'),
 });

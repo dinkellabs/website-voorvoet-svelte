@@ -291,7 +291,9 @@ async function run() {
   // The hidden #capToken input should be filled by the onsolve handler.
   const hiddenValue = await page.inputValue('input[name="capToken"]');
   if (hiddenValue !== solveResult.token) {
-    fail(`hidden capToken mismatch (form=${hiddenValue.slice(0, 12)}…, widget=${solveResult.token.slice(0, 12)}…)`);
+    fail(
+      `hidden capToken mismatch (form=${hiddenValue.slice(0, 12)}…, widget=${solveResult.token.slice(0, 12)}…)`,
+    );
     return;
   }
   log('hidden capToken populated from widget');
@@ -316,7 +318,9 @@ async function run() {
   }
   const mail = inbox.find((m) => m.subject.includes('Nieuw contactformulier'));
   if (!mail) {
-    fail(`expected contact email subject not found; inbox=${JSON.stringify(inbox.map((m) => m.subject))}`);
+    fail(
+      `expected contact email subject not found; inbox=${JSON.stringify(inbox.map((m) => m.subject))}`,
+    );
     return;
   }
   log(`email delivered: "${mail.subject}"`);

@@ -47,7 +47,10 @@ export const load: PageServerLoad = async ({ params, url }) => {
   if (pageKey === 'information') {
     structuredData.push(
       faqPageLD([
-        { question: m.info_what_title({}, { locale: lang }), answer: m.info_what_p1({}, { locale: lang }) },
+        {
+          question: m.info_what_title({}, { locale: lang }),
+          answer: m.info_what_p1({}, { locale: lang }),
+        },
         {
           question: m.info_everyone_title({}, { locale: lang }),
           answer: m.info_everyone_intro({}, { locale: lang }),

@@ -64,9 +64,7 @@ function isRealProductionHost(): boolean {
 if (isRealProductionHost()) {
   const capEnabled = (env.CAP_ENABLED ?? 'false').toLowerCase() === 'true';
   if (!capEnabled) {
-    logger.warn(
-      'CAP_ENABLED is not "true" in production — forms are unprotected against bots.',
-    );
+    logger.warn('CAP_ENABLED is not "true" in production — forms are unprotected against bots.');
   }
 }
 
@@ -91,10 +89,16 @@ function appendUmamiToCsp(existing: string): string {
 
   let updated = existing;
   if (scriptAdditions) {
-    updated = updated.replace(/script-src ([^;]+)/, (_, srcs) => `script-src ${srcs}${scriptAdditions}`);
+    updated = updated.replace(
+      /script-src ([^;]+)/,
+      (_, srcs) => `script-src ${srcs}${scriptAdditions}`,
+    );
   }
   if (connectAdditions) {
-    updated = updated.replace(/connect-src ([^;]+)/, (_, srcs) => `connect-src ${srcs} ${connectAdditions}`);
+    updated = updated.replace(
+      /connect-src ([^;]+)/,
+      (_, srcs) => `connect-src ${srcs} ${connectAdditions}`,
+    );
   }
   return updated;
 }
