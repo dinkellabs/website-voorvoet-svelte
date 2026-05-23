@@ -303,5 +303,6 @@
   "order_pricing_workshoes": "Extra pair for work shoes: {price} per pair.",
   "order_pricing_link": "See all rates on our pricing list.",
   "credits_page_title": "Credits",
-  "credits_page_intro": "Building websites is a team effort, even when you're sitting alone at your laptop. Here's a shout-out to all the tools, images, and people that made this website possible."
+  "credits_page_intro": "Building websites is a team effort, even when you're sitting alone at your laptop. Here's a shout-out to all the tools, images, and people that made this website possible.",
+  "credits_version_label": "Website version {version}"
 }

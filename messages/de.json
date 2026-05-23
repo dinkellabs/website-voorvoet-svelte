@@ -303,5 +303,6 @@
   "order_pricing_workshoes": "Zusätzliches Paar für Arbeitsschuhe: {price} pro Paar.",
   "order_pricing_link": "Sehen Sie sich alle Tarife in unserer Preisliste an.",
   "credits_page_title": "Credits",
-  "credits_page_intro": "Websites bauen ist Teamarbeit, auch wenn man alleine am Laptop sitzt. Hier ein Dankeschön an alle Tools, Bilder und Menschen, die diese Website möglich gemacht haben."
+  "credits_page_intro": "Websites bauen ist Teamarbeit, auch wenn man alleine am Laptop sitzt. Hier ein Dankeschön an alle Tools, Bilder und Menschen, die diese Website möglich gemacht haben.",
+  "credits_version_label": "Website-Version {version}"
 }

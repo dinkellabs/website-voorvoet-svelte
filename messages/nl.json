@@ -303,5 +303,6 @@
   "order_pricing_workshoes": "Extra paar voor werkschoenen: {price} per paar.",
   "order_pricing_link": "Kijk voor alle tarieven op onze tarievenlijst.",
   "credits_page_title": "Credits",
-  "credits_page_intro": "Websites bouwen is teamwork, ook al zit je alleen achter je laptop. Hier een bedankje aan alle tools, afbeeldingen en mensen die deze website mogelijk hebben gemaakt."
+  "credits_page_intro": "Websites bouwen is teamwork, ook al zit je alleen achter je laptop. Hier een bedankje aan alle tools, afbeeldingen en mensen die deze website mogelijk hebben gemaakt.",
+  "credits_version_label": "Websiteversie {version}"
 }
