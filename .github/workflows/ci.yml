@@ -93,11 +93,6 @@ jobs:
     name: E2E tests (Playwright)
     runs-on: ubuntu-latest
     needs: ci
-    # Pre-existing failures on the GitHub runner that were never caught
-    # because CI used to be workflow_dispatch-only (see audit P4-E2).
-    # Marking the job non-blocking so PRs aren't held hostage to a
-    # latent failure; fix and remove continue-on-error in a follow-up.
-    continue-on-error: true
 
     steps:
       - name: Checkout
@@ -150,10 +145,14 @@ jobs:
     name: Lighthouse CI (perf, a11y, SEO)
     runs-on: ubuntu-latest
     needs: ci
-    # See playwright job comment. Lighthouse currently errors with
-    # ERRORED_DOCUMENT_REQUEST on the GitHub runner — likely a preview-
-    # server / CAP env issue that doesn't reproduce locally. Non-blocking
-    # until investigated.
+    # Non-blocking until the form-page 500 is fixed. Reproduces on
+    # both pre-PR dev and on this branch when the app is started via
+    # `node build/index.js`: GET /nl/contact and /nl/zolen-bestellen
+    # return 500. The Playwright job avoids this because it boots the
+    # server with the full E2E env (including the SMTP catcher), which
+    # Lighthouse currently doesn't replicate. Drop continue-on-error
+    # once the 500 is diagnosed and the lhci config either mirrors
+    # the E2E env or excludes form-page URLs.
     continue-on-error: true
 
     steps:

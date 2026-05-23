@@ -111,7 +111,8 @@ test.describe('Order insoles form', () => {
     const mail = inbox.find((m) => m.subject.includes('Eva Visser'));
     expect(mail).toBeTruthy();
     // Normalised in the order email regardless of separator chosen by the user.
-    expect(mail!.text).toContain('01-01-1985');
+    // `data` is the raw RFC-822 payload — `text` is not part of SmtpMessage.
+    expect(mail!.data).toContain('01-01-1985');
   });
 
   test('empty submit shows the form-errors summary and stays on the page', async ({ page }) => {
