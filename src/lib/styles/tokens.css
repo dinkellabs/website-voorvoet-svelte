@@ -15,10 +15,12 @@
   --color-primary-500: #05847c;
   --color-primary-700: #005152;
 
-  /* Button bg matches the home hero "Voetklachten?" title colour (primary-300),
-     hover steps one shade darker (primary-500). */
-  --color-btn-primary: #05a8a2;
-  --color-btn-primary-hover: #05847c;
+  /* Button background uses primary-500 (#05847c) so white text on it clears
+     WCAG 2.1 AA contrast (4.57:1). primary-300 (#05a8a2) was only 2.95:1 and
+     failed both small- and large-text contrast. Hover steps one shade darker
+     (primary-700, 9.14:1). */
+  --color-btn-primary: #05847c;
+  --color-btn-primary-hover: #005152;
 
   /* ----------------------------------------------------------
      Colors — Backgrounds
