@@ -26,14 +26,14 @@
     "@cap.js/wasm": "^0.0.7",
     "@inlang/paraglide-js": "^2.18.0",
     "@sveltejs/adapter-node": "^5.5.4",
-    "@sveltejs/kit": "^2.59.0",
+    "@sveltejs/kit": "^2.61.0",
     "cap-widget": "^0.1.52",
     "capjs-core": "^0.1.1",
     "isbot": "^5.1.39",
     "mdsvex": "^0.12.7",
     "nodemailer": "^8.0.7",
     "pino": "^10.3.1",
-    "svelte": "^5.55.5",
+    "svelte": "^5.55.9",
     "sveltekit-rate-limiter": "^0.7.0",
     "sveltekit-superforms": "^2.30.1",
     "zod": "^4.4.2"
@@ -74,8 +74,9 @@
   "packageManager": "pnpm@10.33.2",
   "pnpm": {
     "overrides": {
-      "kysely": ">=0.28.17"
+      "kysely": ">=0.28.17",
+      "devalue": ">=5.8.1"
     },
-    "//": "The kysely override clears a CVE in @inlang/sdk's transitive kysely<0.28.17 (sqlite-wasm-kysely peer). Verify with `pnpm why kysely` before deleting."
+    "//": "kysely: CVE in @inlang/sdk's transitive kysely<0.28.17 (sqlite-wasm-kysely peer). devalue: GHSA-77vg-94rm-hx3p (DoS via sparse arrays), hits via sveltekit-superforms transitive."
   }
 }

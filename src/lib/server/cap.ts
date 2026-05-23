@@ -4,6 +4,7 @@ import { env as pubEnv } from '$env/dynamic/public';
 import { building } from '$app/environment';
 import { withRequestId } from '$lib/server/logger.js';
 import { consumeToken } from '$lib/server/cap-store.js';
+import { isProductionHostname } from '$lib/server/config.js';
 
 // The gate uses the runtime PUBLIC_SITE_URL hostname rather than the `dev`
 // flag from `$app/environment`, because `dev` is a compile-time constant —
@@ -16,7 +17,7 @@ function isRealProductionHost(): boolean {
   const siteUrl = pubEnv.PUBLIC_SITE_URL;
   if (!siteUrl) return true;
   try {
-    return new URL(siteUrl).hostname === 'voorvoeten.nl';
+    return isProductionHostname(new URL(siteUrl).hostname);
   } catch {
     return true;
   }

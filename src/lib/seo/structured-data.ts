@@ -13,6 +13,13 @@ export type BreadcrumbItem = {
   url: string;
 };
 
+const PHONE = '+31657750997';
+
+const SAME_AS = [
+  'https://www.podotherapie.nl/',
+  'https://www.kwaliteitsregisterparamedici.nl/kwaliteitsregister/paramedici/33997',
+];
+
 /**
  * Organization JSON-LD schema for VoorVoet.
  */
@@ -23,19 +30,22 @@ export function organizationLD(): Record<string, unknown> {
     name: 'VoorVoet',
     url: 'https://voorvoet.nl',
     logo: 'https://voorvoet.nl/images/shared/podotherapeut_enschede_voorvoet_praktijk_voor_podotherapie_logo.svg',
+    telephone: PHONE,
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Eeftinksweg 13',
       addressLocality: 'Enschede',
-      postalCode: '7534 PK',
+      postalCode: '7541 WE',
       addressCountry: 'NL',
     },
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer service',
+      telephone: PHONE,
       areaServed: 'NL',
       availableLanguage: ['Dutch', 'German', 'English'],
     },
+    sameAs: SAME_AS,
   };
 }
 
@@ -52,19 +62,20 @@ export function podiatristLD(): Record<string, unknown> {
     image: 'https://voorvoet.nl/images/page_home/page-preview-podotherapie-enschede-16x9.jpg',
     description:
       'VoorVoet is een praktijk voor podotherapie in Enschede. Professionele behandeling van voetklachten, steunzolen op maat en podotherapie.',
+    telephone: PHONE,
     address: [
       {
         '@type': 'PostalAddress',
         streetAddress: 'Eeftinksweg 13',
         addressLocality: 'Enschede',
-        postalCode: '7534 PK',
+        postalCode: '7541 WE',
         addressCountry: 'NL',
       },
       {
         '@type': 'PostalAddress',
         streetAddress: 'Beethovenlaan 10',
         addressLocality: 'Enschede',
-        postalCode: '7535 CP',
+        postalCode: '7522 HJ',
         addressCountry: 'NL',
       },
     ],
@@ -76,15 +87,38 @@ export function podiatristLD(): Record<string, unknown> {
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        name: 'Eeftinksweg 13',
+        dayOfWeek: ['Monday', 'Thursday'],
         opens: '08:00',
-        closes: '18:00',
+        closes: '17:00',
+      },
+      {
+        '@type': 'OpeningHoursSpecification',
+        name: 'Beethovenlaan 10',
+        dayOfWeek: 'Tuesday',
+        opens: '08:30',
+        closes: '19:30',
+      },
+      {
+        '@type': 'OpeningHoursSpecification',
+        name: 'Beethovenlaan 10',
+        dayOfWeek: 'Wednesday',
+        opens: '08:30',
+        closes: '17:00',
+      },
+      {
+        '@type': 'OpeningHoursSpecification',
+        name: 'Beethovenlaan 10',
+        dayOfWeek: 'Friday',
+        opens: '08:00',
+        closes: '13:00',
       },
     ],
     priceRange: '€€',
     currenciesAccepted: 'EUR',
     paymentAccepted: 'Cash, Credit Card, Bank Transfer',
     medicalSpecialty: 'Podiatry',
+    sameAs: SAME_AS,
   };
 }
 

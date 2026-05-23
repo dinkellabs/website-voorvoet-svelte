@@ -1,10 +1,26 @@
 import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 import { randomUUID } from 'crypto';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { building } from '$app/environment';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
 import logger, { withRequestId } from '$lib/server/logger.js';
 import { trackEvent } from '$lib/server/umami.js';
+import { overwriteServerAsyncLocalStorage } from '$lib/paraglide/runtime.js';
+import { PRODUCTION_HOSTNAMES } from '$lib/server/config.js';
+
+// ─── Paraglide SSR locale ─────────────────────────────────────────────────────
+//
+// Paraglide reads the locale from this AsyncLocalStorage when rendering
+// messages on the server. Without it, message functions fall back to the base
+// locale (nl), causing /de and /en routes to serve Dutch HTML to crawlers.
+
+const paraglideAls = new AsyncLocalStorage<{
+  locale?: 'nl' | 'de' | 'en';
+  origin?: string;
+  messageCalls?: Set<string>;
+}>();
+overwriteServerAsyncLocalStorage(paraglideAls);
 
 // ─── Legacy redirects ────────────────────────────────────────────────────────
 
@@ -30,7 +46,7 @@ function isRealProductionHost(): boolean {
   const siteUrl = pubEnv.PUBLIC_SITE_URL;
   if (!siteUrl) return true;
   try {
-    return new URL(siteUrl).hostname === 'voorvoeten.nl';
+    return (PRODUCTION_HOSTNAMES as readonly string[]).includes(new URL(siteUrl).hostname);
   } catch {
     return true;
   }
@@ -107,9 +123,11 @@ export const handle: Handle = async ({ event, resolve }) => {
   const langSegment = pathname.split('/')[1];
   const lang = langSegment === 'de' || langSegment === 'en' ? langSegment : 'nl';
 
-  const response = await resolve(event, {
-    transformPageChunk: ({ html }) => html.replaceAll('%lang%', lang),
-  });
+  const response = await paraglideAls.run({ locale: lang, origin: event.url.origin }, () =>
+    resolve(event, {
+      transformPageChunk: ({ html }) => html.replaceAll('%lang%', lang),
+    }),
+  );
 
   const contentType = response.headers.get('content-type') ?? '';
   const isHtml = contentType.includes('text/html');

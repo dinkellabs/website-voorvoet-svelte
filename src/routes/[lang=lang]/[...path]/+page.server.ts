@@ -1,11 +1,14 @@
 import { error } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
 import type { PageServerLoad } from './$types.js';
 import type { PageKey } from '$lib/i18n/route-map.js';
-import { langFromParams, pageKeyForPath } from '$lib/i18n/route-map.js';
+import { langFromParams, pageKeyForPath, routeFor } from '$lib/i18n/route-map.js';
+import { PAGE_TITLES } from '$lib/i18n/page-meta.js';
 import { buildMeta } from '$lib/server/seo/meta.js';
 import { buildAlternates } from '$lib/server/seo/alternates.js';
 import { loadLegal } from '$lib/legal/loader.js';
 import { getPricing, getReimbursements } from '$lib/data/reimbursements.server.js';
+import { podiatristLD, breadcrumbListLD } from '$lib/seo/structured-data.js';
 
 const FORM_KEYS: PageKey[] = ['contact', 'order_insoles'];
 const SKIP_KEYS: PageKey[] = [...FORM_KEYS, 'blog', 'home'];
@@ -28,7 +31,19 @@ export const load: PageServerLoad = async ({ params, url }) => {
   const meta = buildMeta({ pageKey, lang, url: url.href });
   const alternates = buildAlternates(pageKey);
 
-  const base = { pageKey, lang, meta, alternates };
+  const siteUrl = (env.SITE_URL ?? 'https://voorvoet.nl').replace(/\/$/, '');
+  const homeTitle = PAGE_TITLES[lang].home;
+  const pageTitle = PAGE_TITLES[lang][pageKey];
+
+  const structuredData = [
+    podiatristLD(),
+    breadcrumbListLD([
+      { name: homeTitle, url: `${siteUrl}${routeFor('home', lang)}` },
+      { name: pageTitle, url: `${siteUrl}${routeFor(pageKey, lang)}` },
+    ]),
+  ];
+
+  const base = { pageKey, lang, meta, alternates, structuredData };
 
   if (pageKey === 'reimbursements') {
     const reimbursements = getReimbursements();
