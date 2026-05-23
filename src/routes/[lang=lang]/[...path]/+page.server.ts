@@ -8,7 +8,8 @@ import { buildMeta } from '$lib/server/seo/meta.js';
 import { buildAlternates } from '$lib/server/seo/alternates.js';
 import { loadLegal } from '$lib/legal/loader.js';
 import { getPricing, getReimbursements } from '$lib/data/reimbursements.server.js';
-import { podiatristLD, breadcrumbListLD } from '$lib/seo/structured-data.js';
+import { podiatristLD, breadcrumbListLD, faqPageLD } from '$lib/seo/structured-data.js';
+import * as m from '$lib/paraglide/messages.js';
 
 const FORM_KEYS: PageKey[] = ['contact', 'order_insoles'];
 const SKIP_KEYS: PageKey[] = [...FORM_KEYS, 'blog', 'home'];
@@ -35,13 +36,33 @@ export const load: PageServerLoad = async ({ params, url }) => {
   const homeTitle = PAGE_TITLES[lang].home;
   const pageTitle = PAGE_TITLES[lang][pageKey];
 
-  const structuredData = [
+  const structuredData: Array<Record<string, unknown>> = [
     podiatristLD(),
     breadcrumbListLD([
       { name: homeTitle, url: `${siteUrl}${routeFor('home', lang)}` },
       { name: pageTitle, url: `${siteUrl}${routeFor(pageKey, lang)}` },
     ]),
   ];
+
+  if (pageKey === 'information') {
+    structuredData.push(
+      faqPageLD([
+        { question: m.info_what_title({}, { locale: lang }), answer: m.info_what_p1({}, { locale: lang }) },
+        {
+          question: m.info_everyone_title({}, { locale: lang }),
+          answer: m.info_everyone_intro({}, { locale: lang }),
+        },
+        {
+          question: m.info_children_title({}, { locale: lang }),
+          answer: m.info_children_intro({}, { locale: lang }),
+        },
+        {
+          question: m.info_athletes_title({}, { locale: lang }),
+          answer: m.info_athletes_intro({}, { locale: lang }),
+        },
+      ]),
+    );
+  }
 
   const base = { pageKey, lang, meta, alternates, structuredData };
 

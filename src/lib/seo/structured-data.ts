@@ -169,3 +169,25 @@ export function breadcrumbListLD(items: BreadcrumbItem[]): Record<string, unknow
     })),
   };
 }
+
+export type FaqEntry = { question: string; answer: string };
+
+/**
+ * FAQPage JSON-LD schema. Each entry's `answer` may include HTML which will
+ * be stripped of tags by Google but preserved here so the rendered page and
+ * the schema match exactly.
+ */
+export function faqPageLD(entries: FaqEntry[]): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: entries.map((e) => ({
+      '@type': 'Question',
+      name: e.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: e.answer,
+      },
+    })),
+  };
+}

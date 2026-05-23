@@ -45,17 +45,27 @@ function buildUrl(
   alternates: string,
   priority: string,
   changefreq: string,
+  lastmod: string,
 ): string {
   return `  <url>
     <loc>${siteUrl}${loc}</loc>
 ${alternates}
+    <lastmod>${lastmod}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>`;
 }
 
+function isoDate(input: string | Date): string {
+  if (typeof input === 'string') {
+    return input.length >= 10 ? input.slice(0, 10) : new Date(input).toISOString().slice(0, 10);
+  }
+  return input.toISOString().slice(0, 10);
+}
+
 export const GET: RequestHandler = async () => {
   const siteUrl = (env.SITE_URL ?? 'https://voorvoet.nl').replace(/\/$/, '');
+  const today = isoDate(new Date());
 
   const staticPages = (Object.keys(ROUTE_MAP) as PageKey[]).flatMap((pageKey) => {
     const paths = ROUTE_MAP[pageKey];
@@ -68,6 +78,7 @@ export const GET: RequestHandler = async () => {
         alternatesStr,
         PAGE_PRIORITIES[pageKey],
         PAGE_CHANGEFREQS[pageKey],
+        today,
       ),
     );
   });
@@ -88,6 +99,7 @@ export const GET: RequestHandler = async () => {
         if (!translatedPost) return [];
 
         const postPath = `/${lang}/blog/${translatedPost.slug}`;
+        const lastmod = translatedPost.date ? isoDate(translatedPost.date) : today;
 
         const altLinks = LANGS.flatMap((altLang) => {
           const altPost = translations[altLang];
@@ -101,7 +113,7 @@ export const GET: RequestHandler = async () => {
           ])
           .join('\n');
 
-        return [buildUrl(siteUrl, postPath, altLinks, '0.7', 'monthly')];
+        return [buildUrl(siteUrl, postPath, altLinks, '0.7', 'monthly', lastmod)];
       });
     });
   } catch {
