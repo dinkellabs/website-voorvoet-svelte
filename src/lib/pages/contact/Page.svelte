@@ -22,7 +22,7 @@
   srcFallback="/images/page_contact/voetklachten_enschede_zere_voeten_voorvoet_contact.jpg"
   srcAvif="/images/page_contact/voetklachten_enschede_zere_voeten_voorvoet_contact.avif"
   srcWebp="/images/page_contact/voetklachten_enschede_zere_voeten_voorvoet_contact.webp"
-  imgAlt={m.nav_contact()}
+  imgAlt={m.contact_hero_img_alt()}
   overlay="blog"
   isShown={false}
   clipBottom="gentle_2"

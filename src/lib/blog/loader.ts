@@ -8,6 +8,9 @@ type GlobModule = {
   default?: Component;
 };
 
+// Eager-load is fine at current post count (~9 across 3 languages). Migrate
+// to a dynamic import at ≥50 posts per language to avoid cold-start memory
+// pressure.
 const modules = import.meta.glob<GlobModule>('/src/content/blog/**/*.md', { eager: true });
 
 function storyNumberFromFilename(filename: string): string {

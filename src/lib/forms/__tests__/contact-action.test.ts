@@ -115,16 +115,18 @@ describe('contactAction', () => {
     expect(mockTrackEvent.mock.calls[0]?.[0]).toMatchObject({ name: 'contact_form_submitted' });
   });
 
-  it('returns 400 when validation fails', async () => {
+  it('returns 400 and emits form_validation_failed when validation fails', async () => {
     const { contactAction } = await import('../contact/action.js');
     const event = buildEvent(buildFormData({ ...validFields, email: 'not-an-email' }));
     const result = await contactAction(event);
 
     expect(result).toMatchObject({ status: 400 });
-    expect(mockTrackEvent).not.toHaveBeenCalled();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(mockTrackEvent).toHaveBeenCalledOnce();
+    expect(mockTrackEvent.mock.calls[0]?.[0]).toMatchObject({ name: 'form_validation_failed' });
   });
 
-  it('returns 400 with code cap_failed when Cap verification fails', async () => {
+  it('returns 400 with code cap_failed and emits form_cap_failed when Cap verification fails', async () => {
     mockVerifyCap.mockResolvedValue(false);
 
     const { contactAction } = await import('../contact/action.js');
@@ -135,10 +137,12 @@ describe('contactAction', () => {
       status: 400,
       data: expect.objectContaining({ code: 'cap_failed' }),
     });
-    expect(mockTrackEvent).not.toHaveBeenCalled();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(mockTrackEvent).toHaveBeenCalledOnce();
+    expect(mockTrackEvent.mock.calls[0]?.[0]).toMatchObject({ name: 'form_cap_failed' });
   });
 
-  it('returns generic 400 submission_failed when SMTP throws (no backend leak)', async () => {
+  it('returns 502 submission_failed and emits form_submit_failed when SMTP throws', async () => {
     mockSendContactEmail.mockRejectedValueOnce(new Error('SMTP down'));
 
     const { contactAction } = await import('../contact/action.js');
@@ -146,19 +150,12 @@ describe('contactAction', () => {
     const result = await contactAction(event);
 
     expect(result).toMatchObject({
-      status: 400,
+      status: 502,
       data: expect.objectContaining({ code: 'submission_failed' }),
     });
-    expect(mockTrackEvent).not.toHaveBeenCalled();
-  });
-
-  it('does not call trackEvent on validation failure', async () => {
-    const { contactAction } = await import('../contact/action.js');
-    const event = buildEvent(buildFormData({ ...validFields, name: 'X' }));
-    await contactAction(event);
-
     await new Promise((r) => setTimeout(r, 10));
-    expect(mockTrackEvent).not.toHaveBeenCalled();
+    expect(mockTrackEvent).toHaveBeenCalledOnce();
+    expect(mockTrackEvent.mock.calls[0]?.[0]).toMatchObject({ name: 'form_submit_failed' });
   });
 
   it('throws 429 when rate limiter trips', async () => {

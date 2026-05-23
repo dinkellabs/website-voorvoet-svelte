@@ -174,10 +174,9 @@ test.describe('Order insoles form', () => {
     // Inline error for birth_date must appear with the new "this date
     // doesn't exist" copy — NOT the generic format hint.
     const birthDateGroup = page.locator('label[for="birth_date"]').locator('..');
-    await expect(birthDateGroup.locator('.form-error')).toContainText(
-      'Deze datum bestaat niet',
-      { timeout: 5_000 },
-    );
+    await expect(birthDateGroup.locator('.form-error')).toContainText('Deze datum bestaat niet', {
+      timeout: 5_000,
+    });
     // No success toast — submission must have been blocked.
     await expect(page.locator('.toast', { hasText: 'Bedankt voor je bestelling' })).toHaveCount(0);
   });

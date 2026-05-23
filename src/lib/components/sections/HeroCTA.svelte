@@ -13,7 +13,11 @@
 
   let { lang, title, items }: Props = $props();
 
-  const href = $derived(page.data.planPortalUrl || routeFor('contact', lang));
+  // Route external portal traffic through /go/plan so the server can record
+  // a `plan_portal_click` Umami event before redirecting to LINK_PLAN_PORTAL.
+  const href = $derived(
+    page.data.planPortalUrl ? `/go/plan?lang=${lang}` : routeFor('contact', lang),
+  );
   const isExternal = $derived(!!page.data.planPortalUrl);
 </script>
 
@@ -39,8 +43,8 @@
       {href}
       class="hero-cta__btn"
       target={isExternal ? '_blank' : undefined}
-      rel={isExternal ? 'noopener noreferrer' : undefined}
-    >{m.cta_book_appointment()}</a>
+      rel={isExternal ? 'noopener noreferrer' : undefined}>{m.cta_book_appointment()}</a
+    >
   </div>
 </div>
 

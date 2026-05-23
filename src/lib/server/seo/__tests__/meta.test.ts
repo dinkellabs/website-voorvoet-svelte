@@ -21,7 +21,7 @@ describe('buildMeta', () => {
       lang: 'nl',
       url: 'https://voorvoet.nl/nl',
     });
-    expect(meta.title).toBe('VoorVoet - Praktijk voor Podotherapie');
+    expect(meta.title).toBe('Podotherapeut Enschede - Voetklachten Behandelen | VoorVoet');
   });
 
   it('returns correct canonical', () => {

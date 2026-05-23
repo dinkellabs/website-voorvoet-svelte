@@ -4,6 +4,7 @@ import type { PageServerLoad } from './$types.js';
 import type { Lang } from '$lib/i18n/route-map.js';
 import { getPostBySlug, getTranslations } from '$lib/blog/loader.js';
 import { langFromParams, routeFor } from '$lib/i18n/route-map.js';
+import { LOCALE_MAP } from '$lib/i18n/locale-map.js';
 import { blogPostingLD, breadcrumbListLD } from '$lib/seo/structured-data.js';
 import type { Component } from 'svelte';
 
@@ -117,13 +118,22 @@ export const load: PageServerLoad = ({ params }) => {
     ]),
   ];
 
+  const description = post.summary.length > 155 ? post.summary.slice(0, 152) + '…' : post.summary;
+
   return {
     post: { ...post, content },
     blogBase,
     meta: {
       title: `${post.title} — VoorVoet`,
-      description: post.summary,
+      description,
       canonical,
+      og: {
+        title: post.title,
+        description,
+        image: image ?? '',
+        locale: LOCALE_MAP[lang],
+        type: 'article',
+      },
     },
     alternates,
     structuredData,
