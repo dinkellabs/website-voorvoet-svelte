@@ -21,7 +21,7 @@ pnpm dev              # http://localhost:5173
 | Forms     | sveltekit-superforms + zod                      |
 | Logging   | pino (JSON in prod, pretty-print in dev)        |
 | Tests     | Vitest (unit) + Playwright (E2E)                |
-| CI        | GitHub Actions + Lighthouse CI                  |
+| CI        | GitHub Actions (lint/type/unit/E2E)             |
 | Deploy    | Docker image on GHCR; TLS at upstream proxy     |
 
 ## Quick Start
@@ -53,7 +53,7 @@ pnpm dev
 | `pnpm check`             | svelte-check TypeScript check               |
 | `pnpm paraglide:compile` | Regenerate i18n from `messages/`            |
 | `pnpm version:sync`      | Sync `package.json` from the `VERSION` file |
-| `pnpm lighthouse`        | Run Lighthouse CI                           |
+| `make lighthouse`        | Audit live voorvoet.nl with Lighthouse      |
 
 ## Project Structure
 
@@ -85,6 +85,19 @@ docs/                   DEPLOY, RUNBOOK, MIGRATION, CONTRIBUTING guides
 docker-compose.yml      App service (expects an upstream reverse proxy)
 Dockerfile              Multi-stage Node.js build
 ```
+
+## Lighthouse
+
+`make lighthouse` runs Lighthouse against the live site (https://voorvoet.nl) for all 24 page × language combinations and writes HTML + JSON reports to `lighthouse-reports/` (gitignored). Open the HTML files in a browser to inspect scores and opportunities.
+
+```fish
+make lighthouse
+open lighthouse-reports/*.html
+```
+
+**Why not in CI?** Synthetic performance scores flap on shared GitHub-hosted runners (±5 point variance from CPU steal time), so any threshold tight enough to catch real regressions also fails on unrelated PRs. The real perf signal lives in CrUX / RUM data from actual visitors, not in a headless Chrome run on a noisy shared VM. Accessibility and SEO regressions worth gating on are already covered by lint, type-check and E2E tests — Lighthouse's marginal value at this site's scale (~10 pages, low traffic, no SLA) doesn't justify the CI noise.
+
+Use this command before a deploy when you want a fresh snapshot, or after shipping a perf-touching change to see the result on live (post-CDN, post-cache, real fonts loaded). All assertions in `lighthouse/lighthouserc.cjs` are `warn`-only so the command always exits 0 — promote a category to `error` locally for a stricter pre-deploy check.
 
 ## Versioning
 
