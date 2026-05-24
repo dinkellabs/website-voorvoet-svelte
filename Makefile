@@ -57,7 +57,7 @@ test-coverage:  ## Run Vitest with V8 coverage
 e2e:  ## Run Playwright end-to-end tests
 	pnpm e2e
 
-lighthouse:  ## Run Lighthouse CI against a local build
+lighthouse:  ## Audit live voorvoet.nl with Lighthouse (writes reports to lighthouse-reports/)
 	pnpm lighthouse
 
 ## Versioning
