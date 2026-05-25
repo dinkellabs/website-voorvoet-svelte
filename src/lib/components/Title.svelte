@@ -32,12 +32,12 @@
 
   .title--h1 {
     font-size: var(--font-size-section-title);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .title--h2 {
     font-size: var(--font-size-section-title);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .title--h3 {

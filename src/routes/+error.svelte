@@ -76,7 +76,7 @@
 
   :global(.error-page__title) {
     font-size: clamp(1.75rem, 3vw + 0.5rem, 3rem);
-    font-weight: 800;
+    font-weight: 900;
     color: var(--color-text-white);
     margin-bottom: 1rem;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);

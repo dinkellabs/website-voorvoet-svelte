@@ -123,7 +123,7 @@
 
   .showcase-title {
     font-size: 2rem;
-    font-weight: 800;
+    font-weight: 900;
     margin-bottom: 2rem;
     color: var(--color-text-heading);
   }
@@ -137,7 +137,7 @@
 
   .demo-section h2 {
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: 1rem;
     color: var(--color-primary-700);
   }

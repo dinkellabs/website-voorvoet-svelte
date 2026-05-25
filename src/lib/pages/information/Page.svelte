@@ -585,7 +585,7 @@
 
   .risk-level-card__title {
     font-size: var(--font-size-h4);
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-heading);
   }
 

@@ -23,7 +23,7 @@
   .blog-post-content :global(h6) {
     color: var(--color-text-heading);
     font-family: var(--font-family);
-    font-weight: 700;
+    font-weight: 600;
     margin-top: var(--spacing-blog-heading-top);
     margin-bottom: var(--spacing-blog-heading-bottom);
     line-height: 1.3;

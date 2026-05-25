@@ -83,7 +83,7 @@
 
   .legal__title {
     font-size: clamp(1.75rem, 3vw + 0.5rem, 2.5rem);
-    font-weight: 800;
+    font-weight: 900;
     color: var(--color-text-heading);
     margin-bottom: 0.5rem;
   }
@@ -108,7 +108,7 @@
 
   .legal__body :global(h2) {
     font-size: 1.4rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-heading);
     margin: 2rem 0 0.75rem;
   }

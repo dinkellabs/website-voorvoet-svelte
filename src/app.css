@@ -1,36 +1,25 @@
 @import "./lib/styles/tokens.css";
 
 /* ============================================================
-   Self-hosted Lato — must mirror OLD's cdnjs lato-font@3.0.0
-   weight-to-file mapping exactly. That package SHIFTS the weight
-   names by one step so each CSS weight maps to a heavier physical
-   cut than the standard Google/Adobe convention:
+   Self-hosted Lato — consolidated to 4 cuts.
 
        CSS weight   →   physical Lato cut
-       300              Light
-       400              Regular
-       500              SEMIBOLD       (not Medium)
-       600              BOLD           (not Semibold)
-       700              (undefined — falls back to 800 = Heavy)
-       800              Heavy
-       900              Black
+       400 normal       Regular
+       400 italic       Italic
+       600              Bold     (covers 500–700 via browser fallback)
+       900              Black    (covers 800 via browser fallback)
 
-   So `font-weight: 600` on OLD renders with real Lato Bold, and
-   `font-weight: 700` falls back through to Lato Heavy. Without the
-   same mapping, NEW renders every semibold/bold one step lighter
-   than OLD and the page reads visibly thinner.
+   Earlier the OLD cdnjs lato-font@3.0.0 mapping shifted weight
+   names by one (300=Light, 500=Semibold, 600=Bold, 800=Heavy,
+   900=Black). That was kept verbatim during the SvelteKit
+   migration, which loaded 7 weight files (~1.3 MB total) for
+   pages that actually used only a handful. Audit P3-L1 flagged
+   the resulting font payload as the dominant LCP regression.
 
-   Weight 700 is intentionally NOT declared so the browser falls
-   back to the nearest heavier face (800 = Heavy), matching OLD.
+   Reweighting the call sites (500/700 → 600, 800 → 900) lets us
+   ship only the four cuts above. Browsers interpolate other
+   font-weight values to the nearest declared face.
    ============================================================ */
-
-@font-face {
-  font-family: "Lato";
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url("/fonts/lato-light.woff2") format("woff2");
-}
 
 @font-face {
   font-family: "Lato";
@@ -51,25 +40,9 @@
 @font-face {
   font-family: "Lato";
   font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("/fonts/lato-semibold.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Lato";
-  font-style: normal;
   font-weight: 600;
   font-display: swap;
   src: url("/fonts/lato-bold.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Lato";
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url("/fonts/lato-heavy.woff2") format("woff2");
 }
 
 @font-face {
