@@ -87,7 +87,7 @@ export async function trackEvent(event: UmamiEvent): Promise<void> {
     if (debugEnabled) {
       logger.info(
         {
-          name: event.name ?? 'pageview',
+          name: event.name,
           url: event.url,
           status: response.status,
           ok: response.ok,
@@ -97,10 +97,7 @@ export async function trackEvent(event: UmamiEvent): Promise<void> {
     }
   } catch (err) {
     if (debugEnabled) {
-      logger.info(
-        { name: event.name ?? 'pageview', url: event.url, err },
-        'umami event post failed',
-      );
+      logger.info({ name: event.name, url: event.url, err }, 'umami event post failed');
     }
   } finally {
     clearTimeout(timer);
