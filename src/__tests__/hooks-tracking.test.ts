@@ -91,8 +91,8 @@ describe('hooks.server — lang transform and tracking', () => {
 
     await new Promise((r) => setTimeout(r, 20));
     expect(mockTrackEvent).toHaveBeenCalledOnce();
-    const call = mockTrackEvent.mock.calls[0]?.[0] as { name: string; language: string };
-    expect(call.name).toBe('pageview');
+    const call = mockTrackEvent.mock.calls[0]?.[0] as { name?: string; language: string };
+    expect(call.name).toBeUndefined();
     expect(call.language).toBe('nl');
   });
 

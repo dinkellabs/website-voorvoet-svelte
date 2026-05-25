@@ -4,7 +4,10 @@ import { isbot } from 'isbot';
 import logger from '$lib/server/logger.js';
 
 export type UmamiEvent = {
-  name: string;
+  // Omit for pageviews — Umami v2 routes events without `name` to the
+  // pageview table (event_type=1, counted in Visitors/Visits/Views).
+  // Set a string for custom events (event_type=2, Events panel only).
+  name?: string;
   url: string;
   hostname: string;
   language: 'nl' | 'de' | 'en';
@@ -56,7 +59,7 @@ export async function trackEvent(event: UmamiEvent): Promise<void> {
     type: 'event',
     payload: {
       website: env.UMAMI_WEBSITE_ID ?? '',
-      name: event.name,
+      ...(event.name ? { name: event.name } : {}),
       url: event.url,
       hostname: event.hostname,
       language: event.language,
@@ -82,14 +85,22 @@ export async function trackEvent(event: UmamiEvent): Promise<void> {
       signal: controller.signal,
     });
     if (debugEnabled) {
-      logger.debug(
-        { name: event.name, url: event.url, status: response.status, ok: response.ok },
+      logger.info(
+        {
+          name: event.name ?? 'pageview',
+          url: event.url,
+          status: response.status,
+          ok: response.ok,
+        },
         'umami event posted',
       );
     }
   } catch (err) {
     if (debugEnabled) {
-      logger.debug({ name: event.name, url: event.url, err }, 'umami event post failed');
+      logger.info(
+        { name: event.name ?? 'pageview', url: event.url, err },
+        'umami event post failed',
+      );
     }
   } finally {
     clearTimeout(timer);
