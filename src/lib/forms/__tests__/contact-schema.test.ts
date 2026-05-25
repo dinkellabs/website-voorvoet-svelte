@@ -85,9 +85,7 @@ describe('contactSchema', () => {
   });
 
   it('rejects missing capToken', () => {
-    const rest = Object.fromEntries(
-      Object.entries(validBase).filter(([k]) => k !== 'capToken'),
-    );
+    const rest = Object.fromEntries(Object.entries(validBase).filter(([k]) => k !== 'capToken'));
     expect(contactSchema.safeParse(rest).success).toBe(false);
   });
 

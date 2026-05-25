@@ -8,7 +8,7 @@ export const GET: RequestHandler = () => {
 
   const body = disallow
     ? `User-agent: *\nDisallow: /\n`
-    : `User-agent: *\nDisallow: /dev/\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`;
+    : `User-agent: *\nDisallow: /dev/\nDisallow: /go/\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`;
 
   return new Response(body, {
     headers: {

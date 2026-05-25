@@ -17,7 +17,7 @@ declare global {
         description?: string;
         ogImage?: string;
         canonical?: string;
-        og?: { image?: string; locale?: string };
+        og?: { image?: string; locale?: string; type?: string };
       };
       alternates?: Array<{ lang: string; href: string }>;
       structuredData?: Record<string, unknown> | Array<unknown>;
@@ -35,6 +35,8 @@ declare global {
       };
     }
   }
+
+  const __APP_VERSION__: string;
 }
 
 export {};

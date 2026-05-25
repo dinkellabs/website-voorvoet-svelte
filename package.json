@@ -1,6 +1,6 @@
 {
   "name": "website-voorvoet-svelte",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,9 @@
     "version:sync": "node scripts/sync-version.mjs",
     "version:check": "node scripts/sync-version.mjs --check",
     "prepare": "test -d src/lib/paraglide || pnpm run paraglide:compile",
+    "predev": "pnpm run version:sync",
     "dev": "pnpm run paraglide:compile && vite dev",
+    "prebuild": "pnpm run version:sync",
     "build": "pnpm run paraglide:compile && vite build",
     "preview": "vite preview",
     "lint": "eslint --max-warnings 0 .",
@@ -22,32 +24,32 @@
   },
   "dependencies": {
     "@cap.js/wasm": "^0.0.7",
-    "@inlang/paraglide-js": "^2.18.0",
+    "@inlang/paraglide-js": "^2.18.1",
     "@sveltejs/adapter-node": "^5.5.4",
-    "@sveltejs/kit": "^2.59.0",
-    "cap-widget": "^0.1.52",
+    "@sveltejs/kit": "^2.61.0",
+    "cap-widget": "^0.1.53",
     "capjs-core": "^0.1.1",
-    "isbot": "^5.1.39",
+    "isbot": "^5.1.40",
     "mdsvex": "^0.12.7",
     "nodemailer": "^8.0.7",
     "pino": "^10.3.1",
-    "svelte": "^5.55.5",
+    "svelte": "^5.55.9",
     "sveltekit-rate-limiter": "^0.7.0",
     "sveltekit-superforms": "^2.30.1",
-    "zod": "^4.4.2"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
     "@eslint/js": "^10.0.1",
     "@lhci/cli": "^0.15.1",
-    "@playwright/test": "^1.59.1",
+    "@playwright/test": "^1.60.0",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "@testing-library/svelte": "^5.3.1",
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.9.1",
     "@types/nodemailer": "^8.0.0",
     "@types/pngjs": "^6.0.5",
-    "@vitest/coverage-v8": "^4.1.5",
-    "eslint": "^10.3.0",
+    "@vitest/coverage-v8": "^4.1.7",
+    "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.17.1",
     "globals": "^17.6.0",
@@ -59,11 +61,11 @@
     "prettier": "^3.8.3",
     "prettier-plugin-svelte": "^3.5.1",
     "selfsigned": "^5.5.0",
-    "svelte-check": "^4.4.7",
+    "svelte-check": "^4.4.8",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.1",
-    "vite": "^8.0.10",
-    "vitest": "^4.1.5",
+    "typescript-eslint": "^8.59.4",
+    "vite": "^8.0.14",
+    "vitest": "^4.1.7",
     "vitest-fetch-mock": "^0.4.5"
   },
   "engines": {
@@ -72,8 +74,9 @@
   "packageManager": "pnpm@10.33.2",
   "pnpm": {
     "overrides": {
-      "kysely": ">=0.28.17"
+      "kysely": ">=0.28.17",
+      "devalue": ">=5.8.1"
     },
-    "//": "The kysely override clears a CVE in @inlang/sdk's transitive kysely<0.28.17 (sqlite-wasm-kysely peer). Verify with `pnpm why kysely` before deleting."
+    "//": "kysely: CVE in @inlang/sdk's transitive kysely<0.28.17 (sqlite-wasm-kysely peer). devalue: GHSA-77vg-94rm-hx3p (DoS via sparse arrays), hits via sveltekit-superforms transitive."
   }
 }

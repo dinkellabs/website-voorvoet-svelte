@@ -86,8 +86,7 @@
   .order-starter__terms {
     font-size: var(--font-size-regular);
     line-height: 1.7;
-    color: var(--color-text-content);
-    font-style: italic;
+    color: var(--color-text-muted);
     margin-top: 1rem;
   }
 </style>

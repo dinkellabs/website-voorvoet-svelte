@@ -348,7 +348,7 @@
 
   .location-item__address {
     font-size: var(--font-size-regular);
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-subheading);
     margin-bottom: 1rem;
     text-align: center;

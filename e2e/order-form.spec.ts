@@ -111,7 +111,8 @@ test.describe('Order insoles form', () => {
     const mail = inbox.find((m) => m.subject.includes('Eva Visser'));
     expect(mail).toBeTruthy();
     // Normalised in the order email regardless of separator chosen by the user.
-    expect(mail!.text).toContain('01-01-1985');
+    // `data` is the raw RFC-822 payload — `text` is not part of SmtpMessage.
+    expect(mail!.data).toContain('01-01-1985');
   });
 
   test('empty submit shows the form-errors summary and stays on the page', async ({ page }) => {
@@ -174,10 +175,9 @@ test.describe('Order insoles form', () => {
     // Inline error for birth_date must appear with the new "this date
     // doesn't exist" copy — NOT the generic format hint.
     const birthDateGroup = page.locator('label[for="birth_date"]').locator('..');
-    await expect(birthDateGroup.locator('.form-error')).toContainText(
-      'Deze datum bestaat niet',
-      { timeout: 5_000 },
-    );
+    await expect(birthDateGroup.locator('.form-error')).toContainText('Deze datum bestaat niet', {
+      timeout: 5_000,
+    });
     // No success toast — submission must have been blocked.
     await expect(page.locator('.toast', { hasText: 'Bedankt voor je bestelling' })).toHaveCount(0);
   });

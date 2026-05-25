@@ -15,8 +15,13 @@
   --color-primary-500: #05847c;
   --color-primary-700: #005152;
 
-  /* Button bg matches the home hero "Voetklachten?" title colour (primary-300),
-     hover steps one shade darker (primary-500). */
+  /* Button bg matches the home hero "Voetklachten?" title colour
+     (primary-300), hover steps one shade darker (primary-500). Deliberate
+     brand-over-WCAG choice: white text on #05a8a2 is 2.95:1 contrast and
+     Lighthouse will flag it, but the lighter shade is the established brand
+     colour and the audit's P3-L4 finding was overridden by design preference
+     (see docs/website-audit-report.md). Reconsider if/when the brand
+     palette is updated. */
   --color-btn-primary: #05a8a2;
   --color-btn-primary-hover: #05847c;
 

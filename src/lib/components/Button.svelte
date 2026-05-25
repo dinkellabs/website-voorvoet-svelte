@@ -63,7 +63,7 @@
     align-items: center;
     justify-content: center;
     font-size: var(--font-size-button);
-    font-weight: 700;
+    font-weight: 600;
     padding: 0.1em 0.8em;
     border-radius: 3px;
     text-decoration: none;

@@ -202,7 +202,9 @@ async function waitForReady(url, timeoutMs = 30_000) {
     try {
       const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
       if (res.ok || res.status < 500) return;
-    } catch {}
+    } catch {
+      // Server not yet listening — retry until deadline.
+    }
     await new Promise((r) => setTimeout(r, 250));
   }
   throw new Error(`Server at ${url} not ready within ${timeoutMs}ms`);
@@ -214,7 +216,9 @@ async function cleanup() {
   if (smtpServer) await new Promise((r) => smtpServer.close(() => r()));
   try {
     fs.unlinkSync(INBOX_PATH);
-  } catch {}
+  } catch {
+    // Inbox file may not exist on early failures.
+  }
 }
 
 async function run() {
@@ -287,7 +291,9 @@ async function run() {
   // The hidden #capToken input should be filled by the onsolve handler.
   const hiddenValue = await page.inputValue('input[name="capToken"]');
   if (hiddenValue !== solveResult.token) {
-    fail(`hidden capToken mismatch (form=${hiddenValue.slice(0, 12)}…, widget=${solveResult.token.slice(0, 12)}…)`);
+    fail(
+      `hidden capToken mismatch (form=${hiddenValue.slice(0, 12)}…, widget=${solveResult.token.slice(0, 12)}…)`,
+    );
     return;
   }
   log('hidden capToken populated from widget');
@@ -312,7 +318,9 @@ async function run() {
   }
   const mail = inbox.find((m) => m.subject.includes('Nieuw contactformulier'));
   if (!mail) {
-    fail(`expected contact email subject not found; inbox=${JSON.stringify(inbox.map((m) => m.subject))}`);
+    fail(
+      `expected contact email subject not found; inbox=${JSON.stringify(inbox.map((m) => m.subject))}`,
+    );
     return;
   }
   log(`email delivered: "${mail.subject}"`);

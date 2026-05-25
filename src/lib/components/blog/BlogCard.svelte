@@ -148,7 +148,7 @@
 
   .blog-card__title {
     font-size: var(--font-size-card-title);
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-heading);
     margin: 0;
     line-height: 1.3;
@@ -176,7 +176,7 @@
     display: inline-flex;
     align-items: center;
     color: var(--color-primary-500);
-    font-weight: 700;
+    font-weight: 600;
     font-size: var(--font-size-regular);
     margin-top: auto;
     padding-top: 0.5rem;
@@ -254,7 +254,7 @@
 
   .blog-card-h__title {
     font-size: var(--font-size-card-title);
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-heading);
     margin: 0;
     line-height: 1.3;

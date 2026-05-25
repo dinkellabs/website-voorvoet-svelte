@@ -99,7 +99,7 @@
   "cta_read_more": "Mehr lesen",
   "cta_back": "Zurück",
   "cta_contact_us": "Kontaktieren Sie uns",
-  "blog_hero_title": "Schritt für Schritt zu gesunden Füßen: alles über Podotherapie",
+  "blog_hero_title": "Podologie Blog | VoorVoet Enschede",
   "blog_hero_img_alt": "Gesunde nackte Füße am Pool - Sandalen mit herausnehmbarem Fußbett für Einlagen",
   "blog_starter_intro": "Auf dieser Seite finden Sie verschiedene interessante Artikel über Fußgesundheit und Podotherapie sowie andere verwandte Themen. Hier teilen wir praktische Tipps und nützliche Einblicke, um Ihre Füße glücklich und gesund zu halten. Ob es darum geht, die richtigen Schuhe zu finden, Podotherapie zu verstehen oder einfach Ihre Füße zu schätzen zu lernen, wir haben verschiedene interessante und informative Artikel, die Ihnen helfen. Schauen Sie sich gerne um und entdecken Sie, wie Sie Ihre Füße am besten pflegen können!",
   "blog_read_more": "Mehr lesen",
@@ -112,6 +112,7 @@
   "home_hero_title": "Fußbeschwerden?",
   "home_hero_subtitle": "Laufen Sie nicht damit weiter!",
   "home_hero_img_alt": "Füße im Bett - Podotherapie hilft bei Fußbeschwerden in Enschede",
+  "contact_hero_img_alt": "Kontaktieren Sie Podologe VoorVoet in Enschede bei Fußbeschwerden",
   "home_cta_title": "Vereinbaren Sie sofort online einen Termin!",
   "home_cta_item1": "Keine Überweisung erforderlich!",
   "home_cta_item2": "Schnelle Hilfe durch einen Fachmann.",
@@ -303,5 +304,6 @@
   "order_pricing_workshoes": "Zusätzliches Paar für Arbeitsschuhe: {price} pro Paar.",
   "order_pricing_link": "Sehen Sie sich alle Tarife in unserer Preisliste an.",
   "credits_page_title": "Credits",
-  "credits_page_intro": "Websites bauen ist Teamarbeit, auch wenn man alleine am Laptop sitzt. Hier ein Dankeschön an alle Tools, Bilder und Menschen, die diese Website möglich gemacht haben."
+  "credits_page_intro": "Websites bauen ist Teamarbeit, auch wenn man alleine am Laptop sitzt. Hier ein Dankeschön an alle Tools, Bilder und Menschen, die diese Website möglich gemacht haben.",
+  "credits_version_label": "Website-Version {version}"
 }

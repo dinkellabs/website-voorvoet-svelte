@@ -1,59 +1,63 @@
+/**
+ * Lighthouse config for ad-hoc audits of the live production site.
+ *
+ * Invoked via `make lighthouse` (= `pnpm lighthouse`). NOT run in CI —
+ * see ADR-style notes in README.md "Lighthouse" section for the
+ * rationale (synthetic perf scores flap on shared CI runners; real
+ * perf signal lives in CrUX/RUM; the audits worth gating on PR are
+ * already covered by lint/type/E2E).
+ *
+ * Reports land in `lighthouse-reports/` (gitignored). Open the HTML
+ * files in a browser to inspect scores and opportunities.
+ */
+const SITE = 'https://voorvoet.nl';
+
 /** @type {import('@lhci/cli').LighthouseRcConfig} */
 module.exports = {
   ci: {
     collect: {
-      // lhci spawns `vite preview` and waits for it before hitting the URLs
-      // below. Without this, Chrome lands on the "site can't be reached"
-      // interstitial and lhci reports "Chrome prevented page load".
-      startServerCommand: 'pnpm preview',
-      startServerReadyPattern: 'Local:',
-      startServerReadyTimeout: 30000,
       url: [
         // NL
-        'http://localhost:4173/nl',
-        'http://localhost:4173/nl/informatie',
-        'http://localhost:4173/nl/vergoedingen',
-        'http://localhost:4173/nl/contact',
-        'http://localhost:4173/nl/zolen-bestellen',
-        'http://localhost:4173/nl/blog',
-        'http://localhost:4173/nl/blog/podotherapeut-of-podoloog',
-        'http://localhost:4173/nl/credits',
+        `${SITE}/nl`,
+        `${SITE}/nl/informatie`,
+        `${SITE}/nl/vergoedingen`,
+        `${SITE}/nl/contact`,
+        `${SITE}/nl/zolen-bestellen`,
+        `${SITE}/nl/blog`,
+        `${SITE}/nl/blog/podotherapeut-of-podoloog`,
+        `${SITE}/nl/credits`,
         // DE
-        'http://localhost:4173/de',
-        'http://localhost:4173/de/informationen',
-        'http://localhost:4173/de/erstattungen',
-        'http://localhost:4173/de/kontakt',
-        'http://localhost:4173/de/einlagen-bestellen',
-        'http://localhost:4173/de/blog',
-        'http://localhost:4173/de/blog/podotherapeut-oder-podologe',
-        'http://localhost:4173/de/credits',
+        `${SITE}/de`,
+        `${SITE}/de/informationen`,
+        `${SITE}/de/erstattungen`,
+        `${SITE}/de/kontakt`,
+        `${SITE}/de/einlagen-bestellen`,
+        `${SITE}/de/blog`,
+        `${SITE}/de/blog/podotherapeut-oder-podologe`,
+        `${SITE}/de/credits`,
         // EN
-        'http://localhost:4173/en',
-        'http://localhost:4173/en/information',
-        'http://localhost:4173/en/reimbursements',
-        'http://localhost:4173/en/contact',
-        'http://localhost:4173/en/order-insoles',
-        'http://localhost:4173/en/blog',
-        'http://localhost:4173/en/blog/podiatrist-or-podologist',
-        'http://localhost:4173/en/credits',
+        `${SITE}/en`,
+        `${SITE}/en/information`,
+        `${SITE}/en/reimbursements`,
+        `${SITE}/en/contact`,
+        `${SITE}/en/order-insoles`,
+        `${SITE}/en/blog`,
+        `${SITE}/en/blog/podiatrist-or-podologist`,
+        `${SITE}/en/credits`,
       ],
       numberOfRuns: 1,
       settings: {
         preset: 'desktop',
         throttlingMethod: 'simulate',
         budgetPath: './lighthouse/budget.json',
-        skipAudits: [
-          // Skip these because they require a real prod domain
-          'uses-http2',
-          'redirects-http',
-          'canonical',
-        ],
       },
     },
     assert: {
-      // Soft-launch: warn first, promote to `error` once CI runner variance is
-      // characterised. Local dev machines hit these comfortably; GitHub-hosted
-      // runners are slower and noisier — switching to `error` now would flap.
+      // Diagnostic only. All categories warn rather than error so the
+      // command always exits 0 and you can read the reports without
+      // tripping over a hard-fail. Adjust if you want a single category
+      // to fail the local run (e.g., promote a11y to 'error' for a
+      // pre-deploy sanity check).
       assertions: {
         'categories:performance': ['warn', { minScore: 0.95 }],
         'categories:accessibility': ['warn', { minScore: 0.95 }],

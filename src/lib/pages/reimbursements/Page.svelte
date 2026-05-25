@@ -6,10 +6,7 @@
   import Title from '$lib/components/Title.svelte';
   import Chevron from '$lib/components/icons/Chevron.svelte';
   import * as m from '$lib/paraglide/messages.js';
-  import type {
-    ReimbursementRow,
-    PricingRow,
-  } from '$lib/data/reimbursements-types.js';
+  import type { ReimbursementRow, PricingRow } from '$lib/data/reimbursements-types.js';
 
   interface Props {
     data: { lang: Lang; reimbursements: ReimbursementRow[]; pricing: PricingRow[] };
@@ -140,6 +137,10 @@
     </div>
 
     <div class="reimb-table-wrap">
+      <!-- tabindex=0 + role=region is the WAI-ARIA APG pattern for making an
+           overflowing scroll container reachable by keyboard. The element is
+           intentionally non-interactive itself. -->
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
       <div class="reimb-table-scroll" tabindex="0" role="region" aria-label={m.reimb_table_title()}>
         <table class="reimb-table">
           <colgroup>
@@ -259,6 +260,7 @@
       <Title level={2} class="pricing-title">{m.reimb_pricing_title()}</Title>
       <p class="pricing-intro">{m.reimb_pricing_intro()}</p>
       <div class="pricing-table-wrap">
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <div
           class="pricing-table-scroll"
           tabindex="0"
@@ -476,7 +478,7 @@
   }
 
   .reimb-tablefoot__count strong {
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .reimb-pagination {
@@ -489,7 +491,7 @@
   .reimb-pagination__btn {
     font-family: var(--font-family);
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 600;
     padding: 0.4rem 0.75rem;
     border: 1px solid var(--color-border-light);
     border-radius: 4px;
@@ -512,7 +514,7 @@
     background-color: var(--color-bg-green-light);
     border-color: var(--color-border-light);
     color: var(--color-text-content);
-    font-weight: 700;
+    font-weight: 600;
     cursor: default;
   }
 
@@ -530,7 +532,6 @@
   .reimb-disclaimer {
     font-size: 0.85rem;
     color: var(--color-text-muted);
-    font-style: italic;
     line-height: 1.6;
   }
 
@@ -548,7 +549,6 @@
   .pricing-disclaimer {
     font-size: 0.85rem;
     color: var(--color-text-muted);
-    font-style: italic;
     line-height: 1.6;
     margin-top: 1.5rem;
   }
@@ -610,6 +610,6 @@
 
   .pricing-table__price {
     white-space: nowrap;
-    font-weight: 500;
+    font-weight: 600;
   }
 </style>

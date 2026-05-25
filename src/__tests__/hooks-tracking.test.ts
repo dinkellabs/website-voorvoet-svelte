@@ -224,7 +224,7 @@ describe('hooks.server — lang transform and tracking', () => {
     expect(call.language).toBe('en');
   });
 
-  it('does not call trackEvent for non-2xx status responses', async () => {
+  it('emits a 404 event (not a pageview) for 404 HTML responses', async () => {
     vi.doMock('$env/dynamic/private', () => ({
       env: { UMAMI_API_URL: 'https://umami.example.com/api/send' },
     }));
@@ -252,7 +252,36 @@ describe('hooks.server — lang transform and tracking', () => {
     await handle({ event, resolve });
 
     await new Promise((r) => setTimeout(r, 20));
-    expect(mockTrackEvent).not.toHaveBeenCalled();
+    expect(mockTrackEvent).toHaveBeenCalledOnce();
+    const call = mockTrackEvent.mock.calls[0]?.[0] as { name: string };
+    expect(call.name).toBe('404');
+  });
+
+  it('emits a legacy_redirect event before throwing 308', async () => {
+    vi.doMock('$env/dynamic/private', () => ({
+      env: { UMAMI_API_URL: 'https://umami.example.com/api/send' },
+    }));
+    vi.doMock('$env/dynamic/public', () => ({ env: {} }));
+    vi.doMock('$lib/server/umami.js', () => ({ trackEvent: mockTrackEvent }));
+
+    const { handle } = await import('../hooks.server.js');
+
+    const url = new URL('https://voorvoet.nl/contact');
+    const resolve = vi.fn().mockResolvedValue(new Response('ok', { status: 200 }));
+
+    const event = {
+      url,
+      request: new Request('https://voorvoet.nl/contact'),
+      params: {},
+      locals: {} as Record<string, unknown>,
+      getClientAddress: () => '1.2.3.4',
+    } as unknown as Parameters<typeof handle>[0]['event'];
+
+    await expect(handle({ event, resolve })).rejects.toMatchObject({ status: 308 });
+    await new Promise((r) => setTimeout(r, 20));
+    expect(mockTrackEvent).toHaveBeenCalledOnce();
+    const call = mockTrackEvent.mock.calls[0]?.[0] as { name: string };
+    expect(call.name).toBe('legacy_redirect');
   });
 
   it('applies lang transform in resolve call', async () => {

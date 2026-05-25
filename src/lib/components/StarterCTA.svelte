@@ -10,7 +10,11 @@
 
   let { lang }: Props = $props();
 
-  const href = $derived(page.data.planPortalUrl || routeFor('contact', lang));
+  // Route external portal traffic through /go/plan so the server can record
+  // a `plan_portal_click` Umami event before redirecting to LINK_PLAN_PORTAL.
+  const href = $derived(
+    page.data.planPortalUrl ? `/go/plan?lang=${lang}` : routeFor('contact', lang),
+  );
   const isExternal = $derived(!!page.data.planPortalUrl);
 </script>
 
@@ -31,7 +35,7 @@
     background-color: var(--color-btn-primary);
     color: var(--color-text-white);
     font-size: var(--font-size-button);
-    font-weight: 700;
+    font-weight: 600;
     padding: 0.1em 0.8em;
     border-radius: 3px;
     text-decoration: none;

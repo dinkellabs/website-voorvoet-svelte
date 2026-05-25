@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import nodemailer, { type Transporter } from 'nodemailer';
 import { env } from '$env/dynamic/private';
 import type { ContactFormData } from '$lib/forms/contact-schema.js';
 import type { OrderFormData } from '$lib/forms/order-schema.js';
@@ -42,8 +42,15 @@ function singleAddressOrThrow(raw: string): string {
   return raw;
 }
 
-function createTransport() {
-  return nodemailer.createTransport({
+// Pooled, lazily-created transport. createTransport is called once per
+// process; previously this ran on every form submission and incurred a
+// fresh TCP + TLS handshake. Lazy creation keeps tests that mock
+// nodemailer from triggering construction at module import.
+let cachedTransport: Transporter | null = null;
+
+function getTransport(): Transporter {
+  if (cachedTransport) return cachedTransport;
+  cachedTransport = nodemailer.createTransport({
     host: env.SMTP_HOST ?? 'smtp.protonmail.ch',
     port: parseInt(env.SMTP_PORT ?? '587', 10),
     secure: false,
@@ -52,10 +59,13 @@ function createTransport() {
       user: env.SMTP_USERNAME,
       pass: env.SMTP_PASSWORD,
     },
+    pool: true,
+    maxConnections: 3,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 15000,
   });
+  return cachedTransport;
 }
 
 function formatDutchDatetime(dt: Date): string {
@@ -84,7 +94,7 @@ function formatDutchDatetime(dt: Date): string {
 
 export async function sendContactEmail(data: ContactFormData, requestId?: string): Promise<void> {
   const log = withRequestId(requestId ?? 'no-request-id');
-  const transport = createTransport();
+  const transport = getTransport();
   const fromEmail = env.SMTP_FROM_EMAIL ?? '';
   const toEmail = env.SMTP_TO_EMAIL ?? '';
   const safeReplyTo = singleAddressOrThrow(sanitizeHeader(data.email));
@@ -137,7 +147,7 @@ ${data.description}`;
 
 export async function sendOrderEmail(data: OrderFormData, requestId?: string): Promise<void> {
   const log = withRequestId(requestId ?? 'no-request-id');
-  const transport = createTransport();
+  const transport = getTransport();
   const fromEmail = env.SMTP_FROM_EMAIL ?? '';
   const toEmail = env.SMTP_TO_EMAIL ?? '';
   const safeReplyTo = singleAddressOrThrow(sanitizeHeader(data.email));

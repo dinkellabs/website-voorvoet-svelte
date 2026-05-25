@@ -121,6 +121,14 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 
 Submit at [hstspreload.org](https://hstspreload.org) after every `voorvoet.nl` subdomain is verified to terminate TLS. Doing this prematurely makes subdomain TLS failures unrecoverable for up to a year per cached client.
 
+**Pre-launch checklist:**
+
+```
+curl -I https://voorvoet.nl | grep -i strict-transport
+```
+
+If empty, the upstream proxy is not setting HSTS — fix the proxy before promoting to production.
+
 ## Exposing the container to your proxy
 
 `docker-compose.yml` uses `expose: 3000` (declares the port for inter-container linking but does not publish it to the host). Two common exposure patterns:

@@ -62,7 +62,7 @@
     <meta name="twitter:description" content={pageMeta.description} />
   {/if}
 
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content={pageMeta?.og?.type ?? 'website'} />
   <meta property="og:site_name" content="VoorVoet" />
 
   {#if pageMeta?.og?.locale}

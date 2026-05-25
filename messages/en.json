@@ -2,7 +2,7 @@
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "nav_home": "Home",
   "nav_blog": "Blog",
-  "nav_information": "Information",
+  "nav_information": "About podiatry",
   "nav_reimbursements": "Reimbursements",
   "nav_contact": "Contact",
   "contact_page_title": "Contact",
@@ -99,7 +99,7 @@
   "cta_read_more": "Read more",
   "cta_back": "Back",
   "cta_contact_us": "Contact us",
-  "blog_hero_title": "Step by step to healthy feet: all about podotherapy and podiatry",
+  "blog_hero_title": "Podiatry Blog | VoorVoet Enschede",
   "blog_hero_img_alt": "Healthy bare feet by pool - sandals with removable footbed for insoles",
   "blog_starter_intro": "On this page you can find various interesting articles about foot health and podotherapy (sometimes called podiatry), along with other related topics. Here we share practical tips and useful insights to keep your feet happy and healthy. Whether it's finding the right shoes, understanding what podiatry and podotherapy can do for you, or simply learning to appreciate your feet, we have various interesting and informative articles to help you. Feel free to take a look and discover how to best care for your feet!",
   "blog_read_more": "Read more",
@@ -112,6 +112,7 @@
   "home_hero_title": "Foot complaints?",
   "home_hero_subtitle": "Don't walk with them!",
   "home_hero_img_alt": "Feet in bed - podotherapy helps with foot complaints in Enschede",
+  "contact_hero_img_alt": "Contact podiatrist VoorVoet in Enschede for foot complaints",
   "home_cta_title": "Make an appointment online right away!",
   "home_cta_item1": "No referral needed!",
   "home_cta_item2": "Quick help from a professional.",
@@ -303,5 +304,6 @@
   "order_pricing_workshoes": "Extra pair for work shoes: {price} per pair.",
   "order_pricing_link": "See all rates on our pricing list.",
   "credits_page_title": "Credits",
-  "credits_page_intro": "Building websites is a team effort, even when you're sitting alone at your laptop. Here's a shout-out to all the tools, images, and people that made this website possible."
+  "credits_page_intro": "Building websites is a team effort, even when you're sitting alone at your laptop. Here's a shout-out to all the tools, images, and people that made this website possible.",
+  "credits_version_label": "Website version {version}"
 }

@@ -21,6 +21,10 @@
 
   let submitAttempted = $state(false);
 
+  // `data` is the SSR-rendered initial form state; superForm consumes it
+  // once at hydration and tracks updates internally. Capturing the initial
+  // value here is intentional.
+  // svelte-ignore state_referenced_locally
   const { form, errors, enhance, submitting, allErrors } = superForm(data, {
     validators: zodClient(contactSchema),
     onSubmit() {
@@ -313,7 +317,7 @@
 
   .required {
     color: var(--color-error, #e74c3c);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   input,
@@ -389,7 +393,7 @@
   .form-submit {
     font-family: var(--font-family);
     font-size: var(--font-size-button);
-    font-weight: 700;
+    font-weight: 600;
     background-color: var(--color-btn-primary);
     color: var(--color-text-white);
     border: none;

@@ -102,7 +102,7 @@
 
   .image-text__title {
     font-size: var(--font-size-section-title);
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-heading);
     margin-bottom: 1rem;
   }
