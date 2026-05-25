@@ -123,7 +123,7 @@
 
   .showcase-title {
     font-size: 2rem;
-    font-weight: 900;
+    font-weight: 600;
     margin-bottom: 2rem;
     color: var(--color-text-heading);
   }

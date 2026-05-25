@@ -83,7 +83,7 @@
 
   .legal__title {
     font-size: clamp(1.75rem, 3vw + 0.5rem, 2.5rem);
-    font-weight: 900;
+    font-weight: 600;
     color: var(--color-text-heading);
     margin-bottom: 0.5rem;
   }

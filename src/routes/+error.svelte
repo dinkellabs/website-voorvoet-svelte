@@ -67,7 +67,7 @@
 
   .error-page__code {
     font-size: 6rem;
-    font-weight: 900;
+    font-weight: 600;
     color: var(--color-text-white);
     line-height: 1;
     opacity: 0.8;
@@ -76,7 +76,7 @@
 
   :global(.error-page__title) {
     font-size: clamp(1.75rem, 3vw + 0.5rem, 3rem);
-    font-weight: 900;
+    font-weight: 600;
     color: var(--color-text-white);
     margin-bottom: 1rem;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
