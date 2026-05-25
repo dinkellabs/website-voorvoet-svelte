@@ -1,12 +1,14 @@
 name: CI
 
-# Runs on every push to main/dev and on every PR targeting them so
-# lint/format/type/unit-test regressions surface before merge.
+# Runs on every PR targeting main/dev so lint/format/type/unit-test
+# regressions surface before merge. The post-merge push to main/dev is
+# already validated by the PR run and would just re-run the same trees,
+# so the `push` trigger is intentionally omitted. Release artefacts on
+# merge are produced by docker-publish.yml.
+#
 # Playwright + Lighthouse are kept in dependent jobs so they only run after
 # `ci` succeeds and skip on draft PRs to keep iteration cycle short.
 on:
-  push:
-    branches: [main, dev]
   pull_request:
     branches: [main, dev]
   workflow_dispatch:
