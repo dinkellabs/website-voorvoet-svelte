@@ -1,23 +1,26 @@
 @import "./lib/styles/tokens.css";
 
 /* ============================================================
-   Self-hosted Lato — consolidated to 3 cuts.
+   Self-hosted Lato — consolidated to 3 cuts, subset to Latin
+   + Latin-Extended (covers NL/DE/EN and the wider European set).
 
        CSS weight   →   physical Lato cut
-       400              Regular
-       600              Bold     (covers 500–700 via browser fallback)
-       900              Black    (covers 800 via browser fallback)
+       400              Regular  (~57 KB subset)
+       600              Bold     (~57 KB subset, covers 500–700)
+       900              Black    (~55 KB subset, covers 800)
+
+   Black uses `font-display: optional` because its sole consumer
+   is the home hero title; if it doesn't arrive in the swap
+   window the fallback (Bold) stays and is visually close enough.
+   Regular and Bold use `swap` so body/heading text is never
+   blocked.
 
    Italic is intentionally dropped: <em> elements get a muted-grey
    colour treatment instead of true italic glyphs (see the `em, i`
-   rule below). This saves ~190 KB on every page that renders
-   <em> content (blog posts, legal docs, page-level notes).
+   rule below).
 
-   Audit P3-L1: font payload was the dominant LCP regression on
-   mobile. We previously shipped 7 weight files (~1.3 MB) for
-   pages that used only a handful; we now ship 3 (~530 KB).
-   Browsers interpolate other font-weight values to the nearest
-   declared face.
+   Subsetting script: scripts/subset-fonts.py
+   Audit P3-L1: payload went 7 files / ~1.3 MB → 3 files / ~170 KB.
    ============================================================ */
 
 @font-face {
@@ -40,7 +43,7 @@
   font-family: "Lato";
   font-style: normal;
   font-weight: 900;
-  font-display: swap;
+  font-display: optional;
   src: url("/fonts/lato-black.woff2") format("woff2");
 }
 
