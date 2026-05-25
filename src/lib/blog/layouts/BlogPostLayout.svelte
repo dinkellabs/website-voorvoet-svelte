@@ -94,6 +94,5 @@
     font-size: var(--font-size-small);
     color: var(--color-text-muted);
     margin-top: var(--spacing-blog-caption-top);
-    font-style: italic;
   }
 </style>

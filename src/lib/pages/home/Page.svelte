@@ -275,8 +275,17 @@
   }
 
   .info-card :global(.info-card__btn) {
+    /* Keyword-rich button text on cards 2 and 3 (audit P3-S1) is too long
+       for the global Button's `white-space: nowrap` and was overflowing the
+       350px card width. Override here: allow wrapping, cap at the card
+       width, centre the (potentially two-line) label. */
     align-self: center;
     margin-top: auto;
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
+    padding-block: 0.5rem;
   }
 
   :global(.locations__title) {

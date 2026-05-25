@@ -532,7 +532,6 @@
   .reimb-disclaimer {
     font-size: 0.85rem;
     color: var(--color-text-muted);
-    font-style: italic;
     line-height: 1.6;
   }
 
@@ -550,7 +549,6 @@
   .pricing-disclaimer {
     font-size: 0.85rem;
     color: var(--color-text-muted);
-    font-style: italic;
     line-height: 1.6;
     margin-top: 1.5rem;
   }

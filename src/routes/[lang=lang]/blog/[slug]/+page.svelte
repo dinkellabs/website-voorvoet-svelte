@@ -210,7 +210,6 @@
     font-size: var(--font-size-small);
     color: var(--color-text-muted);
     margin-top: 0.5rem;
-    font-style: italic;
   }
 
   .blog-post__content :global(.blog-button-wrap) {

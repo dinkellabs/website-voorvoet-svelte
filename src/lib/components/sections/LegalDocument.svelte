@@ -145,10 +145,6 @@
     text-decoration: underline;
   }
 
-  .legal__body :global(em) {
-    font-style: italic;
-  }
-
   .legal__body :global(strong) {
     font-weight: 600;
   }

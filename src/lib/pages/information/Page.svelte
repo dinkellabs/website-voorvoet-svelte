@@ -604,7 +604,6 @@
 
   .reimb-aids-footnote {
     font-size: var(--font-size-regular);
-    font-style: italic;
     color: var(--color-text-muted);
   }
 </style>
