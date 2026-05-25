@@ -48,8 +48,8 @@ on:
         type: choice
         options:
           - ''
-          - voorvoeten-prod
-          - voorvoeten-dev
+          - voorvoet-prod
+          - voorvoet-dev
         default: ''
       deploy_tag:
         description: 'Image tag to deploy (must already exist in GHCR). Required when deploy_service is set.'
@@ -108,10 +108,10 @@ jobs:
         id: deploy_target
         run: |
           if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-            echo "service=voorvoeten-prod" >> "$GITHUB_OUTPUT"
+            echo "service=voorvoet-prod" >> "$GITHUB_OUTPUT"
             echo "tag=${{ steps.version.outputs.value }}" >> "$GITHUB_OUTPUT"
           elif [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
-            echo "service=voorvoeten-dev" >> "$GITHUB_OUTPUT"
+            echo "service=voorvoet-dev" >> "$GITHUB_OUTPUT"
             echo "tag=dev-${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
           else
             echo "::error::unsupported branch ${GITHUB_REF} for deploy target computation"
@@ -178,10 +178,14 @@ jobs:
   deploy:
     # Triggers the server to pull + restart only the affected service. The
     # forced-command SSH key on the server makes the only thing this job
-    # can do `/opt/voorvoeten/deploy.sh <service> <tag>` — see
-    # dinkellabs-infra/pyinfra/files/voorvoeten/deploy.sh. The runner
-    # reaches the server over NetBird (the Hetzner Cloud Firewall locks
-    # public 22 to the operator's home IP).
+    # can do `/opt/voorvoet/deploy.sh <service> <tag>` — see
+    # dinkellabs-infra/pyinfra/files/voorvoet/deploy.sh. The script's
+    # service allowlist now rejects anything other than `voorvoet-prod`
+    # and `voorvoet-dev` (the earlier `voorvoeten-*` names targeted an
+    # orphan compose stack that was silently consuming deploys while
+    # Caddy routed traffic to a different container). The runner reaches
+    # the server over NetBird (the Hetzner Cloud Firewall locks public
+    # 22 to the operator's home IP).
     #
     # Two trigger paths:
     #   - push: deploys what build-and-push just produced.
@@ -226,7 +230,7 @@ jobs:
           # traceability in the NetBird console.
           sudo netbird up \
               --setup-key "$NETBIRD_SETUP_KEY" \
-              --hostname "gha-voorvoeten-${GITHUB_RUN_ID}"
+              --hostname "gha-voorvoet-${GITHUB_RUN_ID}"
 
           # Smoke check: resolve and ping the server peer over the mesh
           # before handing off to ssh. Saves an opaque ssh timeout if
@@ -266,11 +270,11 @@ jobs:
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          # The server's authorized_keys forces /opt/voorvoeten/deploy.sh
+          # The server's authorized_keys forces /opt/voorvoet/deploy.sh
           # regardless of what we send. The args below land in the script's
           # $SSH_ORIGINAL_COMMAND for validation + execution. The script is
           # itself idempotent — if `$TAG` matches the value already in
-          # /opt/voorvoeten/.env and the image hasn't changed, `docker
+          # /opt/voorvoet/.env and the image hasn't changed, `docker
           # compose up -d` is a no-op and no container restart happens.
           # UserKnownHostsFile=/dev/null because GHA runners are ephemeral;
           # accept-new pins host key for this run only.
