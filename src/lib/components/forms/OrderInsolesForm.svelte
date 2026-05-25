@@ -328,7 +328,7 @@
 
   .required {
     color: var(--color-error, #e74c3c);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   input,
@@ -419,7 +419,7 @@
   .form-submit {
     font-family: var(--font-family);
     font-size: var(--font-size-button);
-    font-weight: 700;
+    font-weight: 600;
     background-color: var(--color-btn-primary);
     color: var(--color-text-white);
     border: none;

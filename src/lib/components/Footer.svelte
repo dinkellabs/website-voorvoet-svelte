@@ -277,7 +277,7 @@
   }
 
   .location-title {
-    font-weight: 700;
+    font-weight: 600;
     text-decoration: underline;
     color: var(--color-text-muted);
     margin-bottom: 0.15rem;

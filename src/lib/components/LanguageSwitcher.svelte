@@ -224,7 +224,7 @@
 
   .lang-switcher__option-name {
     font-size: 0.95rem;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--color-primary-700);
   }
 

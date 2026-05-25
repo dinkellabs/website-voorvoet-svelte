@@ -478,7 +478,7 @@
   }
 
   .reimb-tablefoot__count strong {
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .reimb-pagination {
@@ -491,7 +491,7 @@
   .reimb-pagination__btn {
     font-family: var(--font-family);
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 600;
     padding: 0.4rem 0.75rem;
     border: 1px solid var(--color-border-light);
     border-radius: 4px;
@@ -514,7 +514,7 @@
     background-color: var(--color-bg-green-light);
     border-color: var(--color-border-light);
     color: var(--color-text-content);
-    font-weight: 700;
+    font-weight: 600;
     cursor: default;
   }
 
@@ -532,7 +532,6 @@
   .reimb-disclaimer {
     font-size: 0.85rem;
     color: var(--color-text-muted);
-    font-style: italic;
     line-height: 1.6;
   }
 
@@ -550,7 +549,6 @@
   .pricing-disclaimer {
     font-size: 0.85rem;
     color: var(--color-text-muted);
-    font-style: italic;
     line-height: 1.6;
     margin-top: 1.5rem;
   }
@@ -612,6 +610,6 @@
 
   .pricing-table__price {
     white-space: nowrap;
-    font-weight: 500;
+    font-weight: 600;
   }
 </style>

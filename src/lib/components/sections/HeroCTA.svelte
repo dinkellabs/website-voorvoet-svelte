@@ -64,7 +64,7 @@
 
   .hero-cta__title {
     font-size: var(--font-size-hero-cta-title);
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-heading);
     text-align: center;
     line-height: 1.15;
@@ -138,7 +138,7 @@
     background-color: var(--color-btn-primary);
     color: var(--color-text-white);
     font-size: var(--font-size-button);
-    font-weight: 700;
+    font-weight: 600;
     padding: 0.1em 0.8em;
     border-radius: 3px;
     text-decoration: none;

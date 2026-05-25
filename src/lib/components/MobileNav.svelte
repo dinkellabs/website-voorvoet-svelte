@@ -127,7 +127,7 @@
     padding: 10px 16px;
     color: var(--color-primary-700);
     font-size: var(--font-size-nav);
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
     border-radius: 4px;
     transition: background-color 0.15s;

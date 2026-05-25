@@ -104,7 +104,7 @@
 
   :global(.blog-post__back) {
     color: var(--color-primary-500);
-    font-weight: 700;
+    font-weight: 600;
     font-size: var(--font-size-regular);
     margin-bottom: 1rem;
   }
@@ -135,7 +135,7 @@
   .blog-post__content :global(h5),
   .blog-post__content :global(h6) {
     color: var(--color-text-heading);
-    font-weight: 700;
+    font-weight: 600;
     margin-top: var(--spacing-blog-heading-top);
     margin-bottom: var(--spacing-blog-heading-bottom);
     line-height: 1.3;
@@ -210,7 +210,6 @@
     font-size: var(--font-size-small);
     color: var(--color-text-muted);
     margin-top: 0.5rem;
-    font-style: italic;
   }
 
   .blog-post__content :global(.blog-button-wrap) {
@@ -224,7 +223,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 3px;
-    font-weight: 700;
+    font-weight: 600;
     font-size: var(--font-size-button);
     padding: 0.1em 0.8em;
     text-decoration: none;
