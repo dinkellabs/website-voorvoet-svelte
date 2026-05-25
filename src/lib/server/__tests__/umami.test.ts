@@ -24,7 +24,6 @@ const BOT_UA = 'Googlebot/2.1 (+http://www.google.com/bot.html)';
 const HUMAN_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
 
 const baseEvent: UmamiEvent = {
-  name: 'pageview',
   url: '/nl',
   hostname: 'voorvoet.nl',
   language: 'nl',
@@ -78,7 +77,7 @@ describe('trackEvent', () => {
       type: string;
       payload: {
         website: string;
-        name: string;
+        name?: string;
         url: string;
         hostname: string;
         language: string;
@@ -86,10 +85,30 @@ describe('trackEvent', () => {
     };
     expect(body.type).toBe('event');
     expect(body.payload.website).toBe('test-website-id');
-    expect(body.payload.name).toBe('pageview');
+    expect(body.payload.name).toBeUndefined();
     expect(body.payload.url).toBe('/nl');
     expect(body.payload.hostname).toBe('voorvoet.nl');
     expect(body.payload.language).toBe('nl');
+  });
+
+  it('includes name when set (custom event)', async () => {
+    vi.doMock('$env/dynamic/private', () => ({
+      env: {
+        UMAMI_API_URL: 'https://umami.example.com/api/send',
+        UMAMI_WEBSITE_ID: 'test-website-id',
+      },
+    }));
+
+    fetchMock.mockResponseOnce(JSON.stringify({ ok: true }), { status: 200 });
+
+    const { trackEvent } = await import('../umami.js');
+    await trackEvent({ ...baseEvent, name: 'legacy_redirect' });
+
+    const [, options] = fetchMock.mock.calls[0]!;
+    const body = JSON.parse(options?.body as string) as {
+      payload: { name?: string };
+    };
+    expect(body.payload.name).toBe('legacy_redirect');
   });
 
   it('swallows AbortError on timeout', async () => {

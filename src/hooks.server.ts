@@ -202,7 +202,6 @@ export const handle: Handle = async ({ event, resolve }) => {
       const ip = event.getClientAddress();
 
       void trackEvent({
-        name: 'pageview',
         url: pathname,
         hostname: event.url.hostname,
         language: lang,
