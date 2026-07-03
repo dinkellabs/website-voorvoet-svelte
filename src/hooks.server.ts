@@ -32,6 +32,14 @@ const LEGACY_REDIRECTS: Record<string, string> = {
   '/zolen-bestellen': '/nl/zolen-bestellen',
   '/credits': '/nl/credits',
   '/blog': '/nl/blog',
+  // Pre-migration URLs still in Google's index (Search Console, July 2026).
+  // Old English pages carried an "-english" suffix; old blog posts lived
+  // under /podotherapie/. Retired content without an equivalent page is
+  // deliberately absent — a 404 is the correct signal for it.
+  '/en/information-english': '/en/information',
+  '/en/contact-english': '/en/contact',
+  '/en/extra-zolen-english': '/en/order-insoles',
+  '/podotherapie/podotherapeut-of-podoloog-enschede': '/nl/blog/podotherapeut-of-podoloog',
 };
 
 const SKIP_TRACKING_PREFIXES = ['/health', '/sitemap.xml', '/robots.txt', '/csp-report'];
