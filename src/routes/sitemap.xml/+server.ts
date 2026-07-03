@@ -45,12 +45,12 @@ function buildUrl(
   alternates: string,
   priority: string,
   changefreq: string,
-  lastmod: string,
+  lastmod?: string,
 ): string {
+  const lastmodLine = lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : '';
   return `  <url>
     <loc>${siteUrl}${loc}</loc>
-${alternates}
-    <lastmod>${lastmod}</lastmod>
+${alternates}${lastmodLine}
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>`;
@@ -65,8 +65,10 @@ function isoDate(input: string | Date): string {
 
 export const GET: RequestHandler = async () => {
   const siteUrl = (env.SITE_URL ?? 'https://voorvoet.nl').replace(/\/$/, '');
-  const today = isoDate(new Date());
 
+  // Static pages get no <lastmod>: stamping them with "today" on every crawl
+  // tells Google everything changed constantly, so it ignores lastmod entirely
+  // — including the accurate blog-post dates below.
   const staticPages = (Object.keys(ROUTE_MAP) as PageKey[]).flatMap((pageKey) => {
     const paths = ROUTE_MAP[pageKey];
     const alternatesStr = buildAlternateLinks(siteUrl, paths);
@@ -78,7 +80,6 @@ export const GET: RequestHandler = async () => {
         alternatesStr,
         PAGE_PRIORITIES[pageKey],
         PAGE_CHANGEFREQS[pageKey],
-        today,
       ),
     );
   });
@@ -99,7 +100,7 @@ export const GET: RequestHandler = async () => {
         if (!translatedPost) return [];
 
         const postPath = `/${lang}/blog/${translatedPost.slug}`;
-        const lastmod = translatedPost.date ? isoDate(translatedPost.date) : today;
+        const lastmod = translatedPost.date ? isoDate(translatedPost.date) : undefined;
 
         const altLinks = LANGS.flatMap((altLang) => {
           const altPost = translations[altLang];

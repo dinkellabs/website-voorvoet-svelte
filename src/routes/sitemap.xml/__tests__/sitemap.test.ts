@@ -103,6 +103,16 @@ describe('sitemap.xml', () => {
     expect(urlCount).toBe(staticPaths + blogPaths);
   });
 
+  it('emits <lastmod> only for blog posts, sourced from frontmatter dates', async () => {
+    const text = await getXml();
+    const lastmodCount = (text.match(/<lastmod>/g) ?? []).length;
+    const blogPaths = LANGS.reduce((n, lang) => n + getPostsByLang(lang).length, 0);
+    expect(lastmodCount).toBe(blogPaths);
+    for (const post of getPostsByLang('nl')) {
+      expect(text).toContain(`<lastmod>${String(post.date).slice(0, 10)}</lastmod>`);
+    }
+  });
+
   it('uses each known priority value at least once', async () => {
     const text = await getXml();
     expect(text).toContain('<priority>1.0</priority>'); // home
