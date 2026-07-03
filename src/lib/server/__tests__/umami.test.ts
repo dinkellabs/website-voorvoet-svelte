@@ -81,6 +81,7 @@ describe('trackEvent', () => {
         url: string;
         hostname: string;
         language: string;
+        ip?: string;
       };
     };
     expect(body.type).toBe('event');
@@ -89,6 +90,26 @@ describe('trackEvent', () => {
     expect(body.payload.url).toBe('/nl');
     expect(body.payload.hostname).toBe('voorvoet.nl');
     expect(body.payload.language).toBe('nl');
+    expect(body.payload.ip).toBe('1.2.3.4');
+  });
+
+  it('omits payload.ip and X-Forwarded-For when ip is unknown', async () => {
+    vi.doMock('$env/dynamic/private', () => ({
+      env: {
+        UMAMI_API_URL: 'https://umami.example.com/api/send',
+        UMAMI_WEBSITE_ID: 'test-website-id',
+      },
+    }));
+
+    fetchMock.mockResponseOnce(JSON.stringify({ ok: true }), { status: 200 });
+
+    const { trackEvent } = await import('../umami.js');
+    await trackEvent({ ...baseEvent, ip: undefined });
+
+    const [, options] = fetchMock.mock.calls[0]!;
+    const body = JSON.parse(options?.body as string) as { payload: { ip?: string } };
+    expect(body.payload.ip).toBeUndefined();
+    expect((options?.headers as Record<string, string>)['X-Forwarded-For']).toBeUndefined();
   });
 
   it('includes name when set (custom event)', async () => {

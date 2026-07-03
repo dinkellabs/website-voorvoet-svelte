@@ -62,6 +62,10 @@ describe('Legacy redirects', () => {
     '/zolen-bestellen': '/nl/zolen-bestellen',
     '/credits': '/nl/credits',
     '/blog': '/nl/blog',
+    '/en/information-english': '/en/information',
+    '/en/contact-english': '/en/contact',
+    '/en/extra-zolen-english': '/en/order-insoles',
+    '/podotherapie/podotherapeut-of-podoloog-enschede': '/nl/blog/podotherapeut-of-podoloog',
   };
 
   for (const [from, to] of Object.entries(legacyRedirects)) {
