@@ -65,6 +65,11 @@ export async function trackEvent(event: UmamiEvent): Promise<void> {
       language: event.language,
       referrer: event.referrer ?? '',
       ...(event.data ? { data: event.data } : {}),
+      // payload.ip overrides Umami's header-based IP detection (checked
+      // before x-forwarded-for), so visitor geolocation reflects the client
+      // rather than this server — headers get rewritten by any reverse proxy
+      // in front of the Umami instance.
+      ...(event.ip ? { ip: event.ip } : {}),
     },
   };
 
@@ -73,6 +78,7 @@ export async function trackEvent(event: UmamiEvent): Promise<void> {
     'User-Agent': event.userAgent,
   };
 
+  // Kept for older Umami versions that lack payload.ip support.
   if (event.ip) {
     headers['X-Forwarded-For'] = event.ip;
   }
