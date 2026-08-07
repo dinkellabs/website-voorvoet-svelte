@@ -84,8 +84,8 @@ export function getPricing(): PricingRow[] {
 // Treatment names in the source CSV. Single source of truth so the order
 // page and the pricing CSV can't drift apart silently.
 const ORDER_INSOLES_PRICING_KEYS = {
-  extraPair: 'Podotherapeutische zolen extra paar',
-  workShoes: 'Podotherapeutische zolen extra paar voor werkschoenen',
+  extraPair: 'Podotherapeutische zolen extra paar (binnen 3 mnd na 1e paar)',
+  workShoes: 'Podotherapeutische zolen extra paar werk (binnen 3 mnd na 1e paar)',
 } as const;
 
 /**
