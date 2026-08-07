@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseCsv, getPricing } from '../reimbursements.server.js';
+import { parseCsv, getPricing, getOrderPairPricing } from '../reimbursements.server.js';
 
 describe('parseCsv', () => {
   it('returns an array', () => {
@@ -42,5 +42,15 @@ describe('getPricing (default env)', () => {
     const rows = getPricing();
     expect(Array.isArray(rows)).toBe(true);
     expect(rows.length).toBeGreaterThan(0);
+  });
+});
+
+describe('getOrderPairPricing', () => {
+  // Guards the CSV treatment names the order page looks up by string: a rename
+  // in the yearly price list would otherwise render an empty price silently.
+  it('resolves both prices from the default pricing file', () => {
+    const { extraPair, workShoes } = getOrderPairPricing();
+    expect(extraPair).not.toBe('');
+    expect(workShoes).not.toBe('');
   });
 });
