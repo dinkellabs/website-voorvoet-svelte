@@ -93,7 +93,8 @@ jobs:
 
   playwright:
     name: E2E tests (Playwright)
-    runs-on: ubuntu-latest
+    # ubuntu-latest moved to 26.04, which Playwright 1.60 cannot install Chromium on.
+    runs-on: ubuntu-24.04
     needs: ci
 
     steps:
