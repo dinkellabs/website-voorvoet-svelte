@@ -1,6 +1,7 @@
 # Stage 1: Builder
-# node:22-slim pinned by digest for reproducible builds (Renovate/Dependabot can bump on a schedule).
-FROM node:22-slim@sha256:9f6d5975c7dca860947d3915877f85607946403fc55349f39b4bc3688448bb6e AS builder
+# node:22.23.4-slim pinned by digest for reproducible builds (Renovate/Dependabot can bump on a schedule).
+# Do not go below 22.23.4: it is the first 22.x whose bundled CA store distrusts the compromised eMudhra intermediates (Oct 2026).
+FROM node:22.23.4-slim@sha256:5991875dfb80938dd8a6ba3fe3e96fd04929e70792762b3319d8caadbbe229bc AS builder
 
 WORKDIR /app
 
@@ -29,7 +30,7 @@ RUN pnpm prune --prod --config.confirmModulesPurge=false
 RUN node -e "const p=require('./package.json'); delete p.devDependencies; require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2));"
 
 # Stage 2: Runtime
-FROM node:22-slim@sha256:9f6d5975c7dca860947d3915877f85607946403fc55349f39b4bc3688448bb6e AS runtime
+FROM node:22.23.4-slim@sha256:5991875dfb80938dd8a6ba3fe3e96fd04929e70792762b3319d8caadbbe229bc AS runtime
 
 WORKDIR /app
 
