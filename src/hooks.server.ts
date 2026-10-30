@@ -44,6 +44,39 @@ const LEGACY_REDIRECTS: Record<string, string> = {
 
 const SKIP_TRACKING_PREFIXES = ['/health', '/sitemap.xml', '/robots.txt', '/csp-report'];
 
+// ─── Alias hostnames ─────────────────────────────────────────────────────────
+//
+// Legacy and typo domains (voorvoeten.nl, podotherapie-enschede.nl, ...) are
+// proxied to this app by Caddy instead of being redirected there, so the
+// redirect can be counted in Umami. The event is tracked under the canonical
+// hostname so it shares a session with the page view that follows it.
+// ALIAS_HOSTNAMES is a comma-separated list; the canonical origin comes from
+// PUBLIC_SITE_URL. Hosts not in the list (dev, localhost) are never redirected.
+
+function aliasHostnames(): Set<string> {
+  return new Set(
+    (env.ALIAS_HOSTNAMES ?? '')
+      .split(',')
+      .map((host) => host.trim().toLowerCase())
+      .filter(Boolean),
+  );
+}
+
+function canonicalOrigin(): URL | null {
+  const siteUrl = pubEnv.PUBLIC_SITE_URL;
+  if (!siteUrl) return null;
+  try {
+    return new URL(siteUrl);
+  } catch {
+    return null;
+  }
+}
+
+function langOf(pathname: string): 'nl' | 'de' | 'en' {
+  const segment = pathname.split('/')[1];
+  return segment === 'de' || segment === 'en' ? segment : 'nl';
+}
+
 function safeReferrerHost(referrer: string | undefined): string {
   if (!referrer) return '';
   try {
@@ -132,6 +165,30 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   log.info({ method: event.request.method, path: pathname }, 'incoming request');
 
+  const requestHost = event.url.hostname.toLowerCase();
+  const canonical = canonicalOrigin();
+  if (canonical && requestHost !== canonical.hostname && aliasHostnames().has(requestHost)) {
+    if (env.UMAMI_API_URL && !pubEnv.PUBLIC_UMAMI_SCRIPT_URL) {
+      const userAgent = event.request.headers.get('user-agent') ?? '';
+      const referrer = event.request.headers.get('referer') ?? undefined;
+      void trackEvent({
+        name: 'alias_redirect',
+        url: pathname,
+        hostname: canonical.hostname,
+        language: langOf(pathname),
+        referrer,
+        userAgent,
+        ip: event.getClientAddress(),
+        data: {
+          alias_host: requestHost,
+          path: pathname,
+          referrer_host: safeReferrerHost(referrer),
+        },
+      }).catch(() => {});
+    }
+    throw redirect(301, `${canonical.origin}${pathname}${event.url.search}`);
+  }
+
   const legacyTarget = LEGACY_REDIRECTS[pathname];
   if (legacyTarget) {
     if (env.UMAMI_API_URL && !pubEnv.PUBLIC_UMAMI_SCRIPT_URL) {
@@ -158,8 +215,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     throw redirect(308, stripped + qs);
   }
 
-  const langSegment = pathname.split('/')[1];
-  const lang = langSegment === 'de' || langSegment === 'en' ? langSegment : 'nl';
+  const lang = langOf(pathname);
 
   const response = await paraglideAls.run({ locale: lang, origin: event.url.origin }, () =>
     resolve(event, {
